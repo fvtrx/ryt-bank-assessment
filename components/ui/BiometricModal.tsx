@@ -121,7 +121,6 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   authenticateButton: {
-    width: "100%",
     marginBottom: 12,
   },
   cancelButton: {

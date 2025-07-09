@@ -3,10 +3,11 @@ import { RecipientSelector } from "@/components/transfer/RecipientSelector";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
+import { PinModal } from "@/components/ui/PinModal";
 import useAuthStore from "@/store/authStore";
 import useTransferStore from "@/store/transferStore";
 import { TransferRequest } from "@/types";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
@@ -18,9 +19,10 @@ interface Recipient {
 
 export default function TransferScreen() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, hasValidatedPin, setHasValidatedPin } = useAuthStore();
   const { setTransferData, clearTransfer } = useTransferStore();
 
+  const [showPinModal, setShowPinModal] = useState(false);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [recipient, setRecipient] = useState<Recipient | null>(null);
@@ -29,6 +31,30 @@ export default function TransferScreen() {
     recipient?: string;
     general?: string;
   }>({});
+
+  // Check PIN validation when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!hasValidatedPin) {
+        setShowPinModal(true);
+      }
+    }, [hasValidatedPin])
+  );
+
+  useEffect(() => {
+    // Clear any previous transfer data when entering the screen
+    clearTransfer();
+  }, [clearTransfer]);
+
+  const handlePinSuccess = () => {
+    setShowPinModal(false);
+    setHasValidatedPin(true);
+  };
+
+  const handlePinCancel = () => {
+    setShowPinModal(false);
+    router.back(); // Navigate back to previous screen (Home)
+  };
 
   useEffect(() => {
     // Clear any previous transfer data when entering the screen
@@ -105,79 +131,94 @@ export default function TransferScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Transfer Money</Text>
-        <Text style={styles.subtitle}>Perform your money transfers here.</Text>
-      </View>
+    <>
+      <PinModal
+        visible={showPinModal}
+        onSuccess={handlePinSuccess}
+        onCancel={handlePinCancel}
+        title="Secure Transfer Access"
+        subtitle="Enter your PIN to access transfer features"
+      />
 
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
-          <RecipientSelector
-            onSelect={handleRecipientSelect}
-            selectedAccountNumber={recipient?.accountNumber}
-          />
-
-          {errors.recipient && (
-            <Text style={styles.errorText}>{errors.recipient}</Text>
-          )}
-
-          <AmountInput
-            amount={amount}
-            onAmountChange={handleAmountChange}
-            error={errors.amount}
-          />
-
-          <Card style={styles.noteCard}>
-            <Input
-              label="Note (Optional)"
-              placeholder="Add a note for this transfer"
-              value={note}
-              onChangeText={setNote}
-              multiline
-              style={styles.noteInput}
-            />
-          </Card>
-
-          {recipient && amount && !errors.amount && !errors.recipient && (
-            <Card style={styles.summaryCard}>
-              <Text style={styles.summaryTitle}>Transfer Summary</Text>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>To:</Text>
-                <Text style={styles.summaryValue}>{recipient.name}</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Amount:</Text>
-                <Text style={styles.summaryAmount}>
-                  {formatCurrency(parseFloat(amount))}
-                </Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Bank:</Text>
-                <Text style={styles.summaryValue}>{recipient.bank}</Text>
-              </View>
-            </Card>
-          )}
-
-          {errors.general && (
-            <Text style={styles.errorText}>{errors.general}</Text>
-          )}
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Transfer Money</Text>
+          <Text style={styles.subtitle}>
+            Perform your money transfers here.
+          </Text>
         </View>
-      </ScrollView>
-      <View style={styles.footer}>
-        <Button
-          title="Continue"
-          onPress={handleContinue}
-          disabled={
-            !recipient || !amount || !!errors.amount || !!errors.recipient
-          }
-          size="large"
-          style={styles.continueButton}
-        />
-      </View>
 
-      <View style={styles.bottomSpacing} />
-    </View>
+        <ScrollView
+          style={styles.container}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.content}>
+            <RecipientSelector
+              onSelect={handleRecipientSelect}
+              selectedAccountNumber={recipient?.accountNumber}
+            />
+
+            {errors.recipient && (
+              <Text style={styles.errorText}>{errors.recipient}</Text>
+            )}
+
+            <AmountInput
+              amount={amount}
+              onAmountChange={handleAmountChange}
+              error={errors.amount}
+            />
+
+            <Card style={styles.noteCard}>
+              <Input
+                label="Note (Optional)"
+                placeholder="Add a note for this transfer"
+                value={note}
+                onChangeText={setNote}
+                multiline
+                style={styles.noteInput}
+              />
+            </Card>
+
+            {recipient && amount && !errors.amount && !errors.recipient && (
+              <Card style={styles.summaryCard}>
+                <Text style={styles.summaryTitle}>Transfer Summary</Text>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>To:</Text>
+                  <Text style={styles.summaryValue}>{recipient.name}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Amount:</Text>
+                  <Text style={styles.summaryAmount}>
+                    {formatCurrency(parseFloat(amount))}
+                  </Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Bank:</Text>
+                  <Text style={styles.summaryValue}>{recipient.bank}</Text>
+                </View>
+              </Card>
+            )}
+
+            {errors.general && (
+              <Text style={styles.errorText}>{errors.general}</Text>
+            )}
+          </View>
+        </ScrollView>
+        <View style={styles.footer}>
+          <Button
+            title="Continue"
+            onPress={handleContinue}
+            disabled={
+              !recipient || !amount || !!errors.amount || !!errors.recipient
+            }
+            size="large"
+            style={styles.continueButton}
+          />
+        </View>
+
+        <View style={styles.bottomSpacing} />
+      </View>
+    </>
   );
 }
 

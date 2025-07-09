@@ -8,6 +8,8 @@ interface AuthState {
   login: (userData: User) => void;
   logout: () => void;
   updateBalance: (newBalance: number) => void;
+  hasValidatedPin: boolean;
+  setHasValidatedPin: (validated: boolean) => void;
 }
 
 const useAuthStore = create<AuthState>((set) => ({
@@ -21,12 +23,14 @@ const useAuthStore = create<AuthState>((set) => ({
   },
   isAuthenticated: true,
   isLoading: false,
+  hasValidatedPin: false,
   login: (userData) => set({ user: userData, isAuthenticated: true }),
   logout: () => set({ user: null, isAuthenticated: false }),
   updateBalance: (newBalance) =>
     set((state) => ({
       user: state.user ? { ...state.user, balance: newBalance } : null,
     })),
+  setHasValidatedPin: (validated) => set({ hasValidatedPin: validated }),
 }));
 
 export default useAuthStore;

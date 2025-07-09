@@ -1,7 +1,7 @@
 import { TransactionSummary } from "@/components/transfer/TransactionSummary";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import BiometricModal from "@/components/ui/BiometricModal";
@@ -30,14 +30,14 @@ export default function TransferConfirmScreen() {
   // Check if biometric authentication is available
   const [biometricAvailable, setBiometricAvailable] = useState(false);
 
-  React.useEffect(() => {
-    checkBiometricAvailability();
-  }, []);
-
   const checkBiometricAvailability = async () => {
     const available = await biometricService.isAvailable();
     setBiometricAvailable(available);
   };
+
+  useEffect(() => {
+    checkBiometricAvailability();
+  }, []);
 
   const transferMutation = useMutation({
     mutationFn: async (transferData: any) => {
