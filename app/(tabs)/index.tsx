@@ -1,7 +1,10 @@
 import Card from "@/components/ui/Card";
+import { NotificationModal } from "@/components/ui/NotificationModal";
 import useAuthStore from "@/store/authStore";
+import { useNotificationStore } from "@/store/notificationStore";
 import useTransferStore from "@/store/transferStore";
 import { Transaction } from "@/types";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { ArrowDownLeft, ArrowUpRight, Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
@@ -18,7 +21,11 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { recentTransactions } = useTransferStore();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } =
+    useNotificationStore();
   const [accountDetailsVisible, setAccountDetailsVisible] = useState(true);
+  const [notificationModalVisible, setNotificationModalVisible] =
+    useState(false);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-MY", {
@@ -91,13 +98,21 @@ export default function HomeScreen() {
           <Text style={styles.userName}>{user?.name}</Text>
         </View>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.notificationIcon}>
-            <View style={styles.notificationDot} />
+          <TouchableOpacity
+            style={styles.notificationIcon}
+            onPress={() => setNotificationModalVisible(true)}
+          >
+            {unreadCount > 0 && <View style={styles.notificationDot} />}
           </TouchableOpacity>
         </View>
       </View>
 
-      <Card style={styles.balanceCard}>
+      <LinearGradient
+        colors={["#0100E7", "#0100E7", "#0090C1"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.balanceCard}
+      >
         <View style={styles.balanceHeader}>
           <Text style={styles.balanceLabel}>Current Balance</Text>
           <TouchableOpacity
@@ -119,7 +134,7 @@ export default function HomeScreen() {
         <Text style={styles.accountNumber}>
           Account: {accountDetailsVisible ? user?.accountNumber : `**********`}
         </Text>
-      </Card>
+      </LinearGradient>
 
       <View style={styles.quickActions}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -162,6 +177,15 @@ export default function HomeScreen() {
         )}
       </Card>
 
+      <NotificationModal
+        visible={notificationModalVisible}
+        onClose={() => setNotificationModalVisible(false)}
+        notifications={notifications}
+        onMarkAsRead={markAsRead}
+        onMarkAllAsRead={markAllAsRead}
+        onClearAll={clearAll}
+      />
+
       <View style={styles.bottomSpacing} />
     </ScrollView>
   );
@@ -172,6 +196,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F7FA",
   },
+  balanceCard: {
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    marginHorizontal: 20,
+    marginBottom: 24,
+    padding: 20,
+  },
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -216,11 +255,7 @@ const styles = StyleSheet.create({
     top: 8,
     right: 8,
   },
-  balanceCard: {
-    marginHorizontal: 20,
-    marginBottom: 24,
-    backgroundColor: "#1565C0",
-  },
+
   balanceHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
