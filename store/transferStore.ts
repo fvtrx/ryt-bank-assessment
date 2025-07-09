@@ -15,7 +15,7 @@ interface TransferState {
   addFavoriteContact: (contact: Contact) => void;
 }
 
-export const useTransferStore = create<TransferState>((set) => ({
+const useTransferStore = create<TransferState>((set) => ({
   currentTransfer: null,
   recentTransactions: [
     {
@@ -82,3 +82,5 @@ export const useTransferStore = create<TransferState>((set) => ({
       favoriteContacts: [...state.favoriteContacts, contact],
     })),
 }));
+
+export default useTransferStore;
