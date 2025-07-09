@@ -10,7 +10,6 @@ import {
 } from "react-native";
 
 import { apiService } from "@/services/mock/api";
-import useTransferStore from "@/store/transferStore";
 import { Contact } from "@/types";
 import Card from "../ui/Card";
 import Input from "../ui/Input";
@@ -31,14 +30,13 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
   const [searchMode, setSearchMode] = useState(false);
   const [accountNumber, setAccountNumber] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
-  const { favoriteContacts, recentTransactions } = useTransferStore();
 
-  const { data: contacts } = useQuery({
-    queryKey: ["contacts"],
-    queryFn: () => apiService.getContacts(),
+  const { data: favoriteRecipients } = useQuery({
+    queryKey: ["favoriteRecipients"],
+    queryFn: () => apiService.getFavoriteRecipients(),
   });
 
-  const { data: validation, isLoading: isValidating } = useQuery({
+  const { data: validation } = useQuery({
     queryKey: ["validateAccount", accountNumber],
     queryFn: () => apiService.validateAccountNumber(accountNumber),
     enabled: accountNumber.length >= 10,
@@ -72,14 +70,6 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
       bank: contact.bank,
     });
   };
-
-  const recentRecipients = recentTransactions.slice(0, 3).map((t) => ({
-    id: t.id,
-    name: t.recipientName,
-    accountNumber: t.recipientAccountNumber,
-    bank: t.bank,
-    isRecent: true,
-  }));
 
   const renderContact = ({
     item,
@@ -146,24 +136,12 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
           )}
         </View>
       )}
-      {/* 
-      {recentRecipients.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent</Text>
-          <FlatList
-            data={recentRecipients}
-            renderItem={renderContact}
-            keyExtractor={(item) => `recent-${item.id}`}
-            scrollEnabled={false}
-          />
-        </View>
-      )} */}
 
-      {contacts?.data && contacts.data.length > 0 && (
+      {favoriteRecipients?.data && favoriteRecipients.data.length > 0 && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Favorites</Text>
           <FlatList
-            data={contacts.data.filter((c) => c.isFrequent)}
+            data={favoriteRecipients.data.filter((c) => c.isFrequent)}
             renderItem={renderContact}
             keyExtractor={(item) => `favorite-${item.id}`}
             scrollEnabled={false}

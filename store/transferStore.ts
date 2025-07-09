@@ -1,10 +1,9 @@
-import { Contact, Transaction, TransferRequest } from "@/types";
+import { Transaction, TransferRequest } from "@/types";
 import { create } from "zustand";
 
 interface TransferState {
   currentTransfer: Partial<TransferRequest> | null;
   recentTransactions: Transaction[];
-  favoriteContacts: Contact[];
   isProcessing: boolean;
   error: string | null;
   setTransferData: (data: Partial<TransferRequest>) => void;
@@ -12,7 +11,6 @@ interface TransferState {
   addTransaction: (transaction: Transaction) => void;
   setProcessing: (processing: boolean) => void;
   setError: (error: string | null) => void;
-  addFavoriteContact: (contact: Contact) => void;
 }
 
 const useTransferStore = create<TransferState>((set) => ({
@@ -77,10 +75,6 @@ const useTransferStore = create<TransferState>((set) => ({
     })),
   setProcessing: (processing) => set({ isProcessing: processing }),
   setError: (error) => set({ error }),
-  addFavoriteContact: (contact) =>
-    set((state) => ({
-      favoriteContacts: [...state.favoriteContacts, contact],
-    })),
 }));
 
 export default useTransferStore;

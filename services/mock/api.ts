@@ -80,7 +80,7 @@ class ApiService {
     };
   }
 
-  async getContacts(): Promise<ApiResponse<Contact[]>> {
+  async getFavoriteRecipients(): Promise<ApiResponse<Contact[]>> {
     await delay(300);
 
     // Simulate contact list
@@ -104,6 +104,7 @@ class ApiService {
         name: "Siti Aminah",
         accountNumber: "1111222233",
         bank: "Public Bank",
+        isFrequent: true,
       },
       {
         id: "4",

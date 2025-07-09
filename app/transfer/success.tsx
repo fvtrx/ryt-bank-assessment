@@ -7,6 +7,9 @@ import { CircleCheck as CheckCircle } from "lucide-react-native";
 import React from "react";
 import { ScrollView, Share, StyleSheet, Text, View } from "react-native";
 
+import * as Sharing from "expo-sharing";
+import RNHTMLtoPDF from "react-native-html-to-pdf";
+
 export default function TransferSuccessScreen() {
   const router = useRouter();
   const { transactionId } = useLocalSearchParams<{ transactionId: string }>();
@@ -44,34 +47,119 @@ export default function TransferSuccessScreen() {
   const handleShareReceipt = async () => {
     if (!transaction) return;
 
-    const receiptText = `
-Ryt Bank Transfer Receipt
+    try {
+      const htmlContent = `
+      <html>
+      <body style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; color: #333333; background-color: #f5f7fa;">
+        <div style="background-color: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h1 style="color: #2E7D32; font-size: 22px; margin-bottom: 8px;">RYT BANK TRANSFER RECEIPT</h1>
+          <p style="color: #666666; font-size: 14px;">Ref: ${generateReferenceNumber()}</p>
+        </div>
+        
+        <div style="border-top: 1px solid #E0E0E0; padding-top: 16px; margin-top: 16px;">
+          <h2 style="font-size: 16px; color: #333333;">TRANSACTION DETAILS</h2>
+          <p style="display: flex; justify-content: space-between;">
+          <span>Date:</span> <span>${formatDateTime(
+            transaction.timestamp
+          )}</span>
+          </p>
+          <p style="display: flex; justify-content: space-between;">
+          <span>Status:</span> <span style="color: #2E7D32; font-weight: bold;">${transaction.status.toUpperCase()}</span>
+          </p>
+          <p style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold;">
+          <span>Amount:</span> <span style="color: #2E7D32;">${formatCurrency(
+            transaction.amount
+          )}</span>
+          </p>
+        </div>
+        
+        <div style="border-top: 1px solid #E0E0E0; padding-top: 16px; margin-top: 16px;">
+          <h2 style="font-size: 16px; color: #333333;">FROM</h2>
+          <p style="font-weight: bold;">${user?.name}</p>
+          <p style="color: #666666;">Account: ${user?.accountNumber}</p>
+        </div>
+        
+        <div style="border-top: 1px solid #E0E0E0; padding-top: 16px; margin-top: 16px;">
+          <h2 style="font-size: 16px; color: #333333;">TO</h2>
+          <p style="font-weight: bold;">${transaction.recipientName}</p>
+          <p style="color: #666666;">Account: ${
+            transaction.recipientAccountNumber
+          }</p>
+          <p style="color: #1565C0;">${transaction.bank}</p>
+        </div>
+        
+        ${
+          transaction.note
+            ? `
+        <div style="border-top: 1px solid #E0E0E0; padding-top: 16px; margin-top: 16px;">
+          <h2 style="font-size: 16px; color: #333333;">NOTE</h2>
+          <p style="font-style: italic;">${transaction.note}</p>
+        </div>
+        `
+            : ""
+        }
+        
+        <div style="border-top: 1px solid #E0E0E0; padding-top: 16px; margin-top: 16px; text-align: center;">
+          <p style="color: #666666;">Thank you for banking with Ryt Bank!</p>
+        </div>
+        </div>
+      </body>
+      </html>
+      `;
 
-Reference: ${generateReferenceNumber()}
+      // Generate the PDF
+      const options = {
+        html: htmlContent,
+        fileName: `RytBank_Receipt_${transaction.id}`,
+        directory: "Documents",
+        base64: true,
+      };
+
+      const file = await RNHTMLtoPDF.convert(options);
+
+      // Check if sharing is available
+      if (await Sharing.isAvailableAsync()) {
+        // Share the PDF file
+        await Sharing.shareAsync(`file://${file.filePath}`);
+      } else {
+        // Fallback to basic Share API if Expo Sharing is not available
+        await Share.share({
+          title: "Transfer Receipt",
+          message: "Please find attached your transfer receipt",
+          url: `file://${file.filePath}`,
+        });
+      }
+    } catch (error) {
+      console.error("Error generating or sharing PDF receipt:", error);
+
+      // Fallback to text sharing if PDF generation fails
+      const plainTextReceipt = `
+RYT BANK TRANSFER RECEIPT
+Ref: ${generateReferenceNumber()}
+
+TRANSACTION DETAILS
 Date: ${formatDateTime(transaction.timestamp)}
+Status: ${transaction.status.toUpperCase()}
+Amount: ${formatCurrency(transaction.amount)}
 
-FROM: ${user?.name}
+FROM
+${user?.name}
 Account: ${user?.accountNumber}
 
-TO: ${transaction.recipientName}
+TO
+${transaction.recipientName}
 Account: ${transaction.recipientAccountNumber}
 Bank: ${transaction.bank}
+${transaction.note ? `\nNOTE\n${transaction.note}` : ""}
 
-Amount: ${formatCurrency(transaction.amount)}
-${transaction.note ? `Note: ${transaction.note}` : ""}
+Thank you for banking with Ryt Bank!
+      `;
 
-Status: ${transaction.status.toUpperCase()}
-
-Thank you for using Ryt Bank!
-    `;
-
-    try {
       await Share.share({
-        message: receiptText,
+        message: plainTextReceipt,
         title: "Transfer Receipt",
       });
-    } catch (error) {
-      console.error("Error sharing receipt:", error);
     }
   };
 
