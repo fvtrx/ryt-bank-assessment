@@ -136,8 +136,8 @@ export default function TransferScreen() {
         visible={showPinModal}
         onSuccess={handlePinSuccess}
         onCancel={handlePinCancel}
-        title="Secure Transfer Access"
-        subtitle="Enter your PIN to access transfer features"
+        title="6-digit PIN"
+        subtitle="Enter your 6-digit PIN to access money transfer feature."
       />
 
       <View style={styles.container}>

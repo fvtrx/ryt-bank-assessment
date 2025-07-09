@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Lock, X } from "lucide-react-native";
+import { Eye, EyeOff, ShieldAlert, X } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -168,9 +168,6 @@ export const PinModal: React.FC<PinModalProps> = ({
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
-            <View style={styles.iconContainer}>
-              <Lock size={32} color="#1565C0" />
-            </View>
             <TouchableOpacity style={styles.closeButton} onPress={onCancel}>
               <X size={24} color="#666666" />
             </TouchableOpacity>
@@ -221,9 +218,23 @@ export const PinModal: React.FC<PinModalProps> = ({
           </View>
 
           {/* Security Notice */}
-          <Text style={styles.securityNotice}>
-            Your PIN is encrypted and secure. Never share it with anyone.
-          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginInline: 8,
+            }}
+          >
+            <ShieldAlert
+              size={24}
+              color={"#999999"}
+              style={{ marginRight: 8 }}
+            />
+
+            <Text style={styles.securityNotice}>
+              Your PIN is encrypted and secure. Never share it with anyone.
+            </Text>
+          </View>
         </View>
       </View>
     </Modal>
@@ -249,18 +260,10 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "center",
     width: "100%",
     marginBottom: 24,
-  },
-  iconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#E3F2FD",
-    justifyContent: "center",
-    alignItems: "center",
   },
   closeButton: {
     padding: 8,
@@ -345,7 +348,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Inter-Regular",
     color: "#999999",
-    textAlign: "center",
+
     lineHeight: 18,
   },
 });
