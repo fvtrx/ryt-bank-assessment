@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import { apiService } from "@/services/mock/api";
+import useAuthStore from "@/store/authStore";
 import { Contact } from "@/types";
 import Card from "../ui/Card";
 import Input from "../ui/Input";
@@ -30,6 +31,7 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
   const [searchMode, setSearchMode] = useState(false);
   const [accountNumber, setAccountNumber] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
+  const { hasValidatedPin } = useAuthStore();
 
   const { data: favoriteRecipients } = useQuery({
     queryKey: ["favoriteRecipients"],
@@ -93,7 +95,10 @@ export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
       <View style={styles.contactInfo}>
         <Text style={styles.contactName}>{item.name}</Text>
         <Text style={styles.contactDetails}>
-          {item.accountNumber} • {item.bank}
+          {!hasValidatedPin
+            ? `****${item.accountNumber.slice(-4)}`
+            : item.accountNumber}
+          • {item.bank}
         </Text>
       </View>
     </TouchableOpacity>
