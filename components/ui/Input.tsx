@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FC } from "react";
 import { StyleSheet, Text, TextInput, View, ViewStyle } from "react-native";
 
 interface InputProps {
@@ -13,7 +13,7 @@ interface InputProps {
   style?: ViewStyle;
 }
 
-const Input: React.FC<InputProps> = ({
+const Input: FC<InputProps> = ({
   label,
   placeholder,
   value,

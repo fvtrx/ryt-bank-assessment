@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FC } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -18,7 +18,7 @@ interface ButtonProps {
   style?: ViewStyle;
 }
 
-const Button: React.FC<ButtonProps> = ({
+const Button: FC<ButtonProps> = ({
   title,
   onPress,
   variant = "primary",

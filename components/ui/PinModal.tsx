@@ -1,5 +1,5 @@
 import { Eye, EyeOff, ShieldAlert, X } from "lucide-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Modal,
@@ -21,7 +21,7 @@ interface PinModalProps {
   subtitle?: string;
 }
 
-export const PinModal: React.FC<PinModalProps> = ({
+export const PinModal: FC<PinModalProps> = ({
   visible,
   onSuccess,
   onCancel,

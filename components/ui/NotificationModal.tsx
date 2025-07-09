@@ -7,7 +7,7 @@ import {
   Shield,
   X,
 } from "lucide-react-native";
-import React from "react";
+import React, { FC } from "react";
 import {
   Dimensions,
   Modal,
@@ -41,7 +41,7 @@ interface NotificationModalProps {
 
 const { height: screenHeight } = Dimensions.get("window");
 
-export const NotificationModal: React.FC<NotificationModalProps> = ({
+export const NotificationModal: FC<NotificationModalProps> = ({
   visible,
   onClose,
   notifications,

@@ -8,7 +8,7 @@ import useAuthStore from "@/store/authStore";
 import useTransferStore from "@/store/transferStore";
 import { TransferRequest } from "@/types";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 interface Recipient {
@@ -34,7 +34,7 @@ export default function TransferScreen() {
 
   // Check PIN validation when screen comes into focus
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       if (!hasValidatedPin) {
         setShowPinModal(true);
       }

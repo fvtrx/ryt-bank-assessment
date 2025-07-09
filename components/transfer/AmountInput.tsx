@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FC } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import useAuthStore from "@/store/authStore";
@@ -11,7 +11,7 @@ interface AmountInputProps {
   error?: string;
 }
 
-export const AmountInput: React.FC<AmountInputProps> = ({
+export const AmountInput: FC<AmountInputProps> = ({
   amount,
   onAmountChange,
   error,

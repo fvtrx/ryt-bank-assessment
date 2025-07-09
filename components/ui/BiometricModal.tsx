@@ -1,6 +1,6 @@
 import { biometricService } from "@/services/biometrics";
 import { Fingerprint } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Button from "./Button";
 
@@ -11,7 +11,7 @@ interface BiometricModalProps {
   reason?: string;
 }
 
-const BiometricModal: React.FC<BiometricModalProps> = ({
+const BiometricModal: FC<BiometricModalProps> = ({
   visible,
   onAuthenticate,
   onCancel,

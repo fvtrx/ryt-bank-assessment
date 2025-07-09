@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Clock, Search, User } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -24,7 +24,7 @@ interface RecipientSelectorProps {
   selectedAccountNumber?: string;
 }
 
-export const RecipientSelector: React.FC<RecipientSelectorProps> = ({
+export const RecipientSelector: FC<RecipientSelectorProps> = ({
   onSelect,
   selectedAccountNumber,
 }) => {
