@@ -18,6 +18,7 @@ const BiometricModal: FC<BiometricModalProps> = ({
   reason = "Verify your identity to proceed with the transfer",
 }) => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleAuthenticate = async () => {
@@ -28,7 +29,11 @@ const BiometricModal: FC<BiometricModalProps> = ({
       const result = await biometricService.authenticate(reason);
 
       if (result.success) {
-        onAuthenticate(true);
+        setIsSuccess(true);
+        // Add a short delay to show success state before closing
+        setTimeout(() => {
+          onAuthenticate(true);
+        }, 1000);
       } else {
         setError(result.error || "Authentication failed");
         onAuthenticate(false);
@@ -42,7 +47,7 @@ const BiometricModal: FC<BiometricModalProps> = ({
   };
 
   const getBiometricIcon = () => {
-    return <Fingerprint size={64} color="#1565C0" />;
+    return <Fingerprint size={64} color={isSuccess ? "#4CAF50" : "#0100E7"} />;
   };
 
   return (
@@ -57,19 +62,35 @@ const BiometricModal: FC<BiometricModalProps> = ({
           <View style={styles.iconContainer}>{getBiometricIcon()}</View>
 
           <Text style={styles.title}>Biometric Authentication</Text>
-          <Text style={styles.subtitle}>{reason}</Text>
+          <Text style={styles.subtitle}>
+            {isSuccess ? "Authentication successful!" : reason}
+          </Text>
 
           {error && <Text style={styles.errorText}>{error}</Text>}
 
           <View style={styles.buttonContainer}>
             <Button
-              title={isAuthenticating ? "Authenticating..." : "Authenticate"}
+              title={
+                isSuccess
+                  ? "Processing..."
+                  : isAuthenticating
+                  ? "Authenticating..."
+                  : "Authenticate"
+              }
               onPress={handleAuthenticate}
-              loading={isAuthenticating}
-              style={styles.authenticateButton}
+              loading={isAuthenticating || isSuccess}
+              style={[
+                styles.authenticateButton,
+                { backgroundColor: isSuccess ? "#4CAF50" : "#0100E7" },
+              ]}
+              disabled={isSuccess}
             />
 
-            <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={onCancel}
+              disabled={isSuccess}
+            >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -124,7 +145,6 @@ const styles = StyleSheet.create({
   },
   authenticateButton: {
     marginBottom: 12,
-    backgroundColor: "#0100E7",
   },
   cancelButton: {
     padding: 12,

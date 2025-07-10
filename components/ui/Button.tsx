@@ -15,7 +15,7 @@ interface ButtonProps {
   size?: "small" | "medium" | "large";
   disabled?: boolean;
   loading?: boolean;
-  style?: ViewStyle;
+  style?: ViewStyle | ViewStyle[];
 }
 
 const Button: FC<ButtonProps> = ({
