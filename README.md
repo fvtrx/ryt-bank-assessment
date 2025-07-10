@@ -1,8 +1,40 @@
-# Welcome to your Expo app 👋
+# Ryt Bank Front End Assessment
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native mobile banking application built with Expo. This app provides banking features including fund transfers, transaction history, and profile management.
 
-## Get started
+## Features
+
+- **Home Dashboard**: View account balance and recent transactions
+- **Fund Transfers**: Transfer money to contacts using DuitNow or Interbank transfers
+- **Transaction History**: View past transactions
+- **Profile Management**: Update user profile and settings
+- **Biometric Authentication**: Support for secure login with biometrics
+- **PIN Authentication**: Secure transfers with PIN verification
+
+## Tech Stack
+
+- [Expo](https://expo.dev): React Native framework for cross-platform development
+- [Expo Router](https://docs.expo.dev/router/introduction): File-based routing system
+- [React Query](https://tanstack.com/query/v5): Data fetching and state management
+- [Expo Local Authentication](https://docs.expo.dev/versions/latest/sdk/local-authentication/): Biometric authentication
+- [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/): Animations library
+- [Lucide React Native](https://lucide.dev/): Icon library
+
+## Project Structure
+
+- `app/`: Main application screens with file-based routing
+  - `(tabs)/`: Tab-based navigation screens (Home, History, Transfer, Profile)
+  - `transfer/`: Transfer flow screens (confirmation, success)
+- `components/`: Reusable UI components
+  - `ui/`: Base UI components (Button, Card, Input, etc.)
+  - `transfer/`: Transfer-specific components
+- `constants/`: App constants and theme configuration
+- `hooks/`: Custom React hooks
+- `services/`: API services and mock data
+- `store/`: State management stores using Zustand
+- `types/`: TypeScript type definitions
+
+## Getting Started
 
 1. Install dependencies
 
@@ -16,35 +48,34 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+   In the output, you'll find options to open the app in a:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+   - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+   - [Expo Go](https://expo.dev/go) on your physical device
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Development
 
-## Get a fresh project
+This project uses:
 
-When you're ready, run:
+- TypeScript for type safety
+- ESLint for code linting
+- File-based routing with Expo Router
+
+You can start developing by editing the files inside the **app** directory.
+
+## Reset Project
+
+To reset the project to its initial state, run:
 
 ```bash
 npm run reset-project
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+This command will move the starter code to the **app-example** directory and create a blank **app** directory.
 
-## Learn more
+## Learn More
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Expo documentation](https://docs.expo.dev/)
+- [React Native documentation](https://reactnative.dev/)
+- [Expo Router documentation](https://docs.expo.dev/router/introduction/)
