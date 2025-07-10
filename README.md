@@ -36,13 +36,19 @@ A React Native mobile banking application built with Expo. This app provides ban
 
 ## Getting Started
 
-1. Install dependencies
+1. Clone or fork out this repo
+
+   ```bash
+   https://github.com/fvtrx/ryt-bank-assessment.git
+   ```
+
+2. Install dependencies
 
    ```bash
    npm install
    ```
 
-2. Start the app
+3. Start the app
 
    ```bash
    npx expo start
