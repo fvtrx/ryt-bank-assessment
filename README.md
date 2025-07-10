@@ -21,7 +21,6 @@ https://github.com/user-attachments/assets/d5a8be14-9c58-4bef-a9fb-c5ef1cd97a0c
 - [Expo Router](https://docs.expo.dev/router/introduction): File-based routing system
 - [React Query](https://tanstack.com/query/v5): Data fetching and state management
 - [Expo Local Authentication](https://docs.expo.dev/versions/latest/sdk/local-authentication/): Biometric authentication
-- [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/): Animations library
 - [Lucide React Native](https://lucide.dev/): Icon library
 
 ## Project Structure
