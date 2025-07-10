@@ -227,7 +227,7 @@ export default function TransferScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Transfer Money</Text>
           <Text style={styles.subtitle}>
-            Available: {formatCurrency(user?.balance || 0)}
+            Available Balance: {formatCurrency(user?.balance || 0)}
           </Text>
         </View>
 

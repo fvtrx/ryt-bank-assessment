@@ -16,12 +16,14 @@ import {
 import React, { useState } from "react";
 import {
   FlatList,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -97,111 +99,119 @@ export default function HomeScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>
-            {(() => {
-              const hour = new Date().getHours();
-              if (hour < 12) return "Good morning,";
-              if (hour < 18) return "Good afternoon,";
-              return "Good evening,";
-            })()}
-          </Text>
-          <Text style={styles.userName}>{user?.name}</Text>
-        </View>
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            style={styles.notificationIcon}
-            onPress={() => setNotificationModalVisible(true)}
-          >
-            <Bell color={"#0100E7"} />
-            {unreadCount > 0 && <View style={styles.notificationDot} />}
-          </TouchableOpacity>
-        </View>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require("@/assets/images/ryt-bank-logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+
+        <TouchableOpacity
+          style={styles.notificationIcon}
+          onPress={() => setNotificationModalVisible(true)}
+        >
+          <Bell color={"#0100E7"} />
+          {unreadCount > 0 && <View style={styles.notificationDot} />}
+        </TouchableOpacity>
       </View>
 
-      <LinearGradient
-        colors={["#0100E7", "#0100E7", "#0090C1"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={styles.balanceCard}
-      >
-        <View style={styles.balanceHeader}>
-          <Text style={styles.balanceLabel}>Current Balance</Text>
-          <TouchableOpacity
-            style={styles.visibilityToggle}
-            onPress={() => setAccountDetailsVisible(!accountDetailsVisible)}
-          >
-            {accountDetailsVisible ? (
-              <EyeOff size={20} color="#ffffff" />
-            ) : (
-              <Eye size={20} color="#ffffff" />
-            )}
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.balanceAmount}>
-          {accountDetailsVisible
-            ? formatCurrency(user?.balance || 0)
-            : "******"}
-        </Text>
-        <Text style={styles.accountNumber}>
-          Account: {accountDetailsVisible ? user?.accountNumber : `**********`}
-        </Text>
-      </LinearGradient>
-
-      <View style={styles.quickActions}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionsRow}>
-          {quickActions.map((action) => (
-            <TouchableOpacity
-              key={action.id}
-              style={styles.actionButton}
-              onPress={action.onPress}
-            >
-              <View style={styles.actionIcon}>{action.icon}</View>
-              <Text style={styles.actionTitle}>{action.title}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <Card style={styles.transactionsCard}>
-        <View style={styles.transactionsHeader}>
-          <Text style={styles.sectionTitle}>Recent Transactions</Text>
-          <TouchableOpacity onPress={() => router.push("/history")}>
-            <Text style={styles.viewAllText}>View All</Text>
-          </TouchableOpacity>
-        </View>
-
-        {recentTransactions.length > 0 ? (
-          <FlatList
-            data={recentTransactions.slice(0, 3)}
-            renderItem={renderTransaction}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            ItemSeparatorComponent={() => (
-              <View style={styles.transactionSeparator} />
-            )}
-          />
-        ) : (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>No recent transactions</Text>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greeting}>
+              {(() => {
+                const hour = new Date().getHours();
+                if (hour < 12) return "Good morning,";
+                if (hour < 18) return "Good afternoon,";
+                return "Good evening,";
+              })()}
+            </Text>
+            <Text style={styles.userName}>{user?.name}</Text>
           </View>
-        )}
-      </Card>
+        </View>
 
-      <NotificationModal
-        visible={notificationModalVisible}
-        onClose={() => setNotificationModalVisible(false)}
-        notifications={notifications}
-        onMarkAsRead={markAsRead}
-        onMarkAllAsRead={markAllAsRead}
-        onClearAll={clearAll}
-      />
+        <LinearGradient
+          colors={["#0100E7", "#0100E7", "#0090C1"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={styles.balanceCard}
+        >
+          <View style={styles.balanceHeader}>
+            <Text style={styles.balanceLabel}>Current Balance</Text>
+            <TouchableOpacity
+              style={styles.visibilityToggle}
+              onPress={() => setAccountDetailsVisible(!accountDetailsVisible)}
+            >
+              {accountDetailsVisible ? (
+                <EyeOff size={20} color="#ffffff" />
+              ) : (
+                <Eye size={20} color="#ffffff" />
+              )}
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.balanceAmount}>
+            {accountDetailsVisible
+              ? formatCurrency(user?.balance || 0)
+              : "******"}
+          </Text>
+          <Text style={styles.accountNumber}>
+            Account:{" "}
+            {accountDetailsVisible ? user?.accountNumber : `**********`}
+          </Text>
+        </LinearGradient>
 
-      <View style={styles.bottomSpacing} />
-    </ScrollView>
+        <View style={styles.quickActions}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.actionsRow}>
+            {quickActions.map((action) => (
+              <TouchableOpacity
+                key={action.id}
+                style={styles.actionButton}
+                onPress={action.onPress}
+              >
+                <View style={styles.actionIcon}>{action.icon}</View>
+                <Text style={styles.actionTitle}>{action.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <Card style={styles.transactionsCard}>
+          <View style={styles.transactionsHeader}>
+            <Text style={styles.sectionTitle}>Recent Transactions</Text>
+            <TouchableOpacity onPress={() => router.push("/history")}>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+
+          {recentTransactions.length > 0 ? (
+            <FlatList
+              data={recentTransactions.slice(0, 3)}
+              renderItem={renderTransaction}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              ItemSeparatorComponent={() => (
+                <View style={styles.transactionSeparator} />
+              )}
+            />
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>No recent transactions</Text>
+            </View>
+          )}
+        </Card>
+
+        <NotificationModal
+          visible={notificationModalVisible}
+          onClose={() => setNotificationModalVisible(false)}
+          notifications={notifications}
+          onMarkAsRead={markAsRead}
+          onMarkAllAsRead={markAllAsRead}
+          onClearAll={clearAll}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -209,6 +219,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F5F7FA",
+  },
+  logoContainer: {
+    paddingHorizontal: 15,
+    paddingTop: 10,
+    paddingBottom: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  logo: {
+    height: 40,
+    width: 120,
   },
   balanceCard: {
     borderRadius: 16,
@@ -224,13 +245,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     padding: 20,
   },
-
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-    paddingTop: 60,
   },
   greeting: {
     fontSize: 16,
@@ -269,7 +288,6 @@ const styles = StyleSheet.create({
     top: 4,
     right: 6,
   },
-
   balanceHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
