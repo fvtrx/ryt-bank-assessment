@@ -343,6 +343,7 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     width: "100%",
+    backgroundColor: "#0100E7",
   },
   securityNotice: {
     fontSize: 12,

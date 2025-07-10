@@ -31,9 +31,11 @@ const BiometricModal: FC<BiometricModalProps> = ({
         onAuthenticate(true);
       } else {
         setError(result.error || "Authentication failed");
+        onAuthenticate(false);
       }
     } catch (err) {
       setError("An error occurred during authentication");
+      onAuthenticate(false);
     } finally {
       setIsAuthenticating(false);
     }
@@ -122,6 +124,7 @@ const styles = StyleSheet.create({
   },
   authenticateButton: {
     marginBottom: 12,
+    backgroundColor: "#0100E7",
   },
   cancelButton: {
     padding: 12,

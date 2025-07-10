@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   unreadBadge: {
-    backgroundColor: "#FF6B6B",
+    backgroundColor: "#0100E7",
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   },
   unreadNotification: {
     borderLeftWidth: 4,
-    borderLeftColor: "#1565C0",
+    borderLeftColor: "#0100E7",
   },
   notificationContent: {
     flexDirection: "row",
@@ -386,12 +386,12 @@ const styles = StyleSheet.create({
   },
   unreadDot: {
     position: "absolute",
-    top: 16,
-    right: 16,
+    top: 8,
+    right: 10,
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#1565C0",
+    backgroundColor: "#0100E7",
   },
   emptyState: {
     alignItems: "center",

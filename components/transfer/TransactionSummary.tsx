@@ -1,14 +1,14 @@
-import React from "react";
+import React, { FC } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { TransferRequest } from "@/types";
 import Card from "../ui/Card";
 
 interface TransactionSummaryProps {
-  transferData: TransferRequest;
+  transferData: Partial<TransferRequest>;
 }
 
-export const TransactionSummary: React.FC<TransactionSummaryProps> = ({
+export const TransactionSummary: FC<TransactionSummaryProps> = ({
   transferData,
 }) => {
   const formatCurrency = (value: number) => {
@@ -34,7 +34,9 @@ export const TransactionSummary: React.FC<TransactionSummaryProps> = ({
 
       <View style={styles.row}>
         <Text style={styles.label}>Amount</Text>
-        <Text style={styles.amount}>{formatCurrency(transferData.amount)}</Text>
+        <Text style={styles.amount}>
+          {formatCurrency(transferData.amount || 0)}
+        </Text>
       </View>
 
       {transferData.note && (
@@ -49,7 +51,7 @@ export const TransactionSummary: React.FC<TransactionSummaryProps> = ({
       <View style={styles.row}>
         <Text style={styles.totalLabel}>Total</Text>
         <Text style={styles.totalAmount}>
-          {formatCurrency(transferData.amount)}
+          {formatCurrency(transferData.amount || 0)}
         </Text>
       </View>
     </Card>
@@ -98,7 +100,7 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 18,
     fontFamily: "Inter-Bold",
-    color: "#1565C0",
+    color: "#0100E7",
   },
   divider: {
     height: 1,
@@ -113,6 +115,6 @@ const styles = StyleSheet.create({
   totalAmount: {
     fontSize: 20,
     fontFamily: "Inter-Bold",
-    color: "#1565C0",
+    color: "#0100E7",
   },
 });

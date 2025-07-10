@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   amountPreview: {
     fontSize: 24,
     fontFamily: "Inter-Bold",
-    color: "#1565C0",
+    color: "#0100E7",
     textAlign: "center",
     marginTop: 8,
   },

@@ -31,7 +31,7 @@ export const RecipientSelector: FC<RecipientSelectorProps> = ({
   const [searchMode, setSearchMode] = useState(false);
   const [accountNumber, setAccountNumber] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
-  const { hasValidatedPin } = useAuthStore();
+  const { hasValidatedBiometric } = useAuthStore();
 
   const { data: favoriteRecipients } = useQuery({
     queryKey: ["favoriteRecipients"],
@@ -95,7 +95,7 @@ export const RecipientSelector: FC<RecipientSelectorProps> = ({
       <View style={styles.contactInfo}>
         <Text style={styles.contactName}>{item.name}</Text>
         <Text style={styles.contactDetails}>
-          {!hasValidatedPin
+          {!hasValidatedBiometric
             ? `****${item.accountNumber.slice(-4)}`
             : item.accountNumber}
           • {item.bank}

@@ -1,15 +1,23 @@
 import { AmountInput } from "@/components/transfer/AmountInput";
 import { RecipientSelector } from "@/components/transfer/RecipientSelector";
+import BiometricModal from "@/components/ui/BiometricModal";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
-import { PinModal } from "@/components/ui/PinModal";
+import { biometricService } from "@/services/biometrics";
 import useAuthStore from "@/store/authStore";
 import useTransferStore from "@/store/transferStore";
 import { TransferRequest } from "@/types";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 interface Recipient {
   name: string;
@@ -19,47 +27,106 @@ interface Recipient {
 
 export default function TransferScreen() {
   const router = useRouter();
-  const { user, hasValidatedPin, setHasValidatedPin } = useAuthStore();
+  const { user, hasValidatedBiometric, setHasValidatedBiometric } =
+    useAuthStore();
   const { setTransferData, clearTransfer } = useTransferStore();
 
-  const [showPinModal, setShowPinModal] = useState(false);
+  const [showBiometricModal, setShowBiometricModal] = useState(false);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [recipient, setRecipient] = useState<Recipient | null>(null);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [errors, setErrors] = useState<{
     amount?: string;
     recipient?: string;
     general?: string;
   }>({});
 
-  // Check PIN validation when screen comes into focus
+  // Check biometric validation when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      if (!hasValidatedPin) {
-        setShowPinModal(true);
-      }
-    }, [hasValidatedPin])
+      checkBiometricAndPrompt();
+    }, [hasValidatedBiometric])
   );
 
+  const checkBiometricAndPrompt = async () => {
+    if (!hasValidatedBiometric) {
+      const available = await biometricService.isAvailable();
+      setBiometricAvailable(available);
+
+      if (available) {
+        setShowBiometricModal(true);
+      } else {
+        // For web or devices without biometric, show alert and allow access
+        if (Platform.OS === "web") {
+          Alert.alert(
+            "Biometric Not Available",
+            "Biometric authentication is not available on web. You can proceed with PIN authentication on the confirmation screen.",
+            [
+              {
+                text: "Continue",
+                onPress: () => setHasValidatedBiometric(true),
+              },
+              {
+                text: "Cancel",
+                style: "cancel",
+                onPress: () => router.back(),
+              },
+            ]
+          );
+        } else {
+          Alert.alert(
+            "Biometric Not Available",
+            "Biometric authentication is not available on this device. You can proceed with PIN authentication on the confirmation screen.",
+            [
+              {
+                text: "Continue",
+                onPress: () => setHasValidatedBiometric(true),
+              },
+              {
+                text: "Cancel",
+                style: "cancel",
+                onPress: () => router.back(),
+              },
+            ]
+          );
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     // Clear any previous transfer data when entering the screen
     clearTransfer();
   }, [clearTransfer]);
 
-  const handlePinSuccess = () => {
-    setShowPinModal(false);
-    setHasValidatedPin(true);
+  const handleBiometricResult = (success: boolean) => {
+    setShowBiometricModal(false);
+    if (success) {
+      setHasValidatedBiometric(true);
+    } else {
+      Alert.alert(
+        "Authentication Failed",
+        "Biometric authentication failed. Please try again or go back to the home screen.",
+        [
+          {
+            text: "Try Again",
+            onPress: () => setShowBiometricModal(true),
+          },
+          {
+            text: "Go Back",
+            style: "cancel",
+            onPress: () => router.back(),
+          },
+        ]
+      );
+    }
   };
 
-  const handlePinCancel = () => {
-    setShowPinModal(false);
-    router.back(); // Navigate back to previous screen (Home)
+  const handleBiometricCancel = () => {
+    setShowBiometricModal(false);
+    router.back();
   };
-
-  useEffect(() => {
-    // Clear any previous transfer data when entering the screen
-    clearTransfer();
-  }, [clearTransfer]);
 
   const validateTransfer = (): boolean => {
     const newErrors: typeof errors = {};
@@ -132,12 +199,11 @@ export default function TransferScreen() {
 
   return (
     <>
-      <PinModal
-        visible={showPinModal}
-        onSuccess={handlePinSuccess}
-        onCancel={handlePinCancel}
-        title="6-digit PIN"
-        subtitle="Enter your 6-digit PIN to access money transfer feature."
+      <BiometricModal
+        visible={showBiometricModal}
+        onAuthenticate={handleBiometricResult}
+        onCancel={handleBiometricCancel}
+        reason="Verify your identity to access transfer features"
       />
 
       <View style={styles.container}>
@@ -285,7 +351,7 @@ const styles = StyleSheet.create({
   summaryAmount: {
     fontSize: 16,
     fontFamily: "Inter-Bold",
-    color: "#1565C0",
+    color: "#0100E7",
   },
   errorText: {
     fontSize: 14,

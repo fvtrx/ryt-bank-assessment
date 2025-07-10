@@ -2,17 +2,19 @@ import { User } from "@/types";
 import { create } from "zustand";
 
 interface AuthState {
-  isAuthenticated: boolean;
   user: User | null;
+  isAuthenticated: boolean;
   isLoading: boolean;
+  hasValidatedBiometric: boolean;
+  hasValidatedPin: boolean;
   login: (userData: User) => void;
   logout: () => void;
   updateBalance: (newBalance: number) => void;
-  hasValidatedPin: boolean;
+  setHasValidatedBiometric: (validated: boolean) => void;
   setHasValidatedPin: (validated: boolean) => void;
 }
 
-const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: {
     id: "1",
     name: "Abdullah Fitri",
@@ -23,6 +25,7 @@ const useAuthStore = create<AuthState>((set) => ({
   },
   isAuthenticated: true,
   isLoading: false,
+  hasValidatedBiometric: false,
   hasValidatedPin: false,
   login: (userData) => set({ user: userData, isAuthenticated: true }),
   logout: () => set({ user: null, isAuthenticated: false }),
@@ -30,6 +33,8 @@ const useAuthStore = create<AuthState>((set) => ({
     set((state) => ({
       user: state.user ? { ...state.user, balance: newBalance } : null,
     })),
+  setHasValidatedBiometric: (validated) =>
+    set({ hasValidatedBiometric: validated }),
   setHasValidatedPin: (validated) => set({ hasValidatedPin: validated }),
 }));
 

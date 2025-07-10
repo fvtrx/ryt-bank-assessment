@@ -1,13 +1,12 @@
 import { TransactionSummary } from "@/components/transfer/TransactionSummary";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
-import BiometricModal from "@/components/ui/BiometricModal";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { biometricService } from "@/services/biometrics";
+import { PinModal } from "@/components/ui/PinModal";
 import { apiService } from "@/services/mock/api";
 import useAuthStore from "@/store/authStore";
 import useTransferStore from "@/store/transferStore";
@@ -24,22 +23,9 @@ export default function TransferConfirmScreen() {
     isProcessing,
   } = useTransferStore();
 
-  const [showBiometric, setShowBiometric] = useState(false);
-  const [biometricError, setBiometricError] = useState<string | null>(null);
+  const [showPinModal, setShowPinModal] = useState(false);
 
-  // Check if biometric authentication is available
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
-
-  const checkBiometricAvailability = async () => {
-    const available = await biometricService.isAvailable();
-    setBiometricAvailable(available);
-  };
-
-  useEffect(() => {
-    checkBiometricAvailability();
-  }, []);
-
-  const { mutate: performTransfer } = useMutation({
+  const transferMutation = useMutation({
     mutationFn: async (transferData: any) => {
       setProcessing(true);
       const result = await apiService.processTransfer(transferData);
@@ -47,15 +33,12 @@ export default function TransferConfirmScreen() {
     },
     onSuccess: (result) => {
       if (result.success && result.data) {
-        // Update user balance
         const newBalance =
           (user?.balance || 0) - (currentTransfer?.amount || 0);
+
+        // Update user balance and add transaction
         updateBalance(newBalance);
-
-        // Add transaction to history
         addTransaction(result.data);
-
-        // Clear current transfer
         clearTransfer();
 
         // Navigate to success screen
@@ -86,52 +69,22 @@ export default function TransferConfirmScreen() {
       Alert.alert("Error", "Transfer data not found");
       return;
     }
-
-    if (biometricAvailable) {
-      setShowBiometric(true);
-      setBiometricError(null);
-    } else {
-      // Fallback: Show confirmation dialog
-      Alert.alert(
-        "Confirm Transfer",
-        `Are you sure you want to transfer ${formatCurrency(
-          Number(currentTransfer.amount)
-        )} to ${currentTransfer.recipientName}?`,
-        [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-          {
-            text: "Confirm",
-            style: "default",
-            onPress: () => processTransfer(),
-          },
-        ]
-      );
-    }
+    setShowPinModal(true);
   };
 
-  const handleBiometricResult = (success: boolean) => {
-    if (success) {
-      setShowBiometric(false);
-      processTransfer();
-    } else {
-      setBiometricError("Authentication failed. Please try again.");
-    }
+  const handlePinSuccess = () => {
+    setShowPinModal(false);
+    processTransfer();
+  };
+
+  const handlePinCancel = () => {
+    setShowPinModal(false);
   };
 
   const processTransfer = () => {
     if (currentTransfer) {
-      performTransfer(currentTransfer);
+      transferMutation.mutate(currentTransfer);
     }
-  };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-MY", {
-      style: "currency",
-      currency: "MYR",
-    }).format(value);
   };
 
   if (!currentTransfer) {
@@ -153,13 +106,14 @@ export default function TransferConfirmScreen() {
 
   return (
     <>
-      <View style={styles.header}>
-        <Text style={styles.title}>Confirm Transfer</Text>
-        <Text style={styles.subtitle}>
-          Please review the details before confirming
-        </Text>
-      </View>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Confirm Transfer</Text>
+          <Text style={styles.subtitle}>
+            Please review the details before confirming
+          </Text>
+        </View>
+
         <View style={styles.content}>
           <TransactionSummary transferData={currentTransfer} />
 
@@ -169,20 +123,12 @@ export default function TransferConfirmScreen() {
               <Text style={styles.securityTitle}>Security Notice</Text>
             </View>
             <Text style={styles.securityText}>
-              {biometricAvailable
-                ? "You will be prompted to verify your identity using biometric authentication."
-                : "You will need to confirm this transfer manually."}
+              You will be prompted to enter your PIN to complete this transfer.
             </Text>
             <Text style={styles.securitySubtext}>
               This transfer cannot be cancelled once confirmed.
             </Text>
           </Card>
-
-          {biometricError && (
-            <View style={styles.errorCard}>
-              <Text style={styles.errorText}>{biometricError}</Text>
-            </View>
-          )}
 
           <Card style={styles.disclaimerCard}>
             <Text style={styles.disclaimerTitle}>Important Information</Text>
@@ -193,34 +139,35 @@ export default function TransferConfirmScreen() {
             </Text>
           </Card>
         </View>
+
+        <View style={styles.footer}>
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Cancel"
+              variant="outline"
+              onPress={() => router.back()}
+              style={styles.cancelButton}
+              disabled={isProcessing}
+            />
+            <Button
+              title="Confirm Transfer"
+              onPress={handleConfirmTransfer}
+              loading={isProcessing}
+              style={styles.confirmButton}
+              disabled={isProcessing}
+            />
+          </View>
+        </View>
+
+        <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      <View style={styles.footer}>
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Cancel"
-            variant="outline"
-            onPress={() => router.back()}
-            style={styles.cancelButton}
-            disabled={isProcessing}
-          />
-          <Button
-            title="Confirm Transfer"
-            onPress={handleConfirmTransfer}
-            loading={isProcessing}
-            style={styles.confirmButton}
-            disabled={isProcessing}
-          />
-        </View>
-      </View>
-
-      <View style={styles.bottomSpacing} />
-
-      <BiometricModal
-        visible={showBiometric}
-        onAuthenticate={handleBiometricResult}
-        onCancel={() => setShowBiometric(false)}
-        reason="Verify your identity to complete the transfer"
+      <PinModal
+        visible={showPinModal}
+        onSuccess={handlePinSuccess}
+        onCancel={handlePinCancel}
+        title="Confirm Transfer"
+        subtitle="Enter your PIN to complete the transfer"
       />
     </>
   );
@@ -325,9 +272,11 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
+    borderColor: "#E0E0E0",
   },
   confirmButton: {
     flex: 2,
+    backgroundColor: "#0100E7",
   },
   bottomSpacing: {
     height: 8,
