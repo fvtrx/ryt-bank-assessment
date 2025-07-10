@@ -1,5 +1,6 @@
 import { AmountInput } from "@/components/transfer/AmountInput";
 import { RecipientSelector } from "@/components/transfer/RecipientSelector";
+import { TransferTypeSelector } from "@/components/transfer/TransferTypeSelector";
 import BiometricModal from "@/components/ui/BiometricModal";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -9,7 +10,7 @@ import useAuthStore from "@/store/authStore";
 import useTransferStore from "@/store/transferStore";
 import { TransferRequest } from "@/types";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Platform,
@@ -29,22 +30,26 @@ export default function TransferScreen() {
   const router = useRouter();
   const { user, hasValidatedBiometric, setHasValidatedBiometric } =
     useAuthStore();
-  const { setTransferData, clearTransfer } = useTransferStore();
+  const { setTransferData, clearTransfer, setError } = useTransferStore();
 
   const [showBiometricModal, setShowBiometricModal] = useState(false);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [recipient, setRecipient] = useState<Recipient | null>(null);
+  const [transferType, setTransferType] = useState<
+    "duitnow" | "interbank" | null
+  >(null);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [errors, setErrors] = useState<{
     amount?: string;
     recipient?: string;
+    transferType?: string;
     general?: string;
   }>({});
 
   // Check biometric validation when screen comes into focus
   useFocusEffect(
-    useCallback(() => {
+    React.useCallback(() => {
       checkBiometricAndPrompt();
     }, [hasValidatedBiometric])
   );
@@ -154,12 +159,16 @@ export default function TransferScreen() {
       newErrors.recipient = "Cannot transfer to your own account";
     }
 
+    // Validate transfer type
+    if (!transferType) {
+      newErrors.transferType = "Please select a transfer type";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleContinue = () => {
-    if (!validateTransfer() || !recipient) return;
+    if (!validateTransfer() || !recipient || !transferType) return;
 
     const transferData: TransferRequest = {
       recipientId: recipient.accountNumber,
@@ -168,6 +177,7 @@ export default function TransferScreen() {
       amount: parseFloat(amount),
       note: note.trim() || undefined,
       bank: recipient.bank,
+      transferType,
     };
 
     setTransferData(transferData);
@@ -190,6 +200,13 @@ export default function TransferScreen() {
     }
   };
 
+  const handleTransferTypeSelect = (type: "duitnow" | "interbank") => {
+    setTransferType(type);
+    // Clear transfer type error when user selects
+    if (errors.transferType) {
+      setErrors((prev) => ({ ...prev, transferType: undefined }));
+    }
+  };
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-MY", {
       style: "currency",
@@ -210,7 +227,7 @@ export default function TransferScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Transfer Money</Text>
           <Text style={styles.subtitle}>
-            Perform your money transfers here.
+            Available: {formatCurrency(user?.balance || 0)}
           </Text>
         </View>
 
@@ -226,6 +243,15 @@ export default function TransferScreen() {
 
             {errors.recipient && (
               <Text style={styles.errorText}>{errors.recipient}</Text>
+            )}
+
+            <TransferTypeSelector
+              selectedType={transferType}
+              onSelect={handleTransferTypeSelect}
+            />
+
+            {errors.transferType && (
+              <Text style={styles.errorText}>{errors.transferType}</Text>
             )}
 
             <AmountInput
@@ -245,37 +271,56 @@ export default function TransferScreen() {
               />
             </Card>
 
-            {recipient && amount && !errors.amount && !errors.recipient && (
-              <Card style={styles.summaryCard}>
-                <Text style={styles.summaryTitle}>Transfer Summary</Text>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>To:</Text>
-                  <Text style={styles.summaryValue}>{recipient.name}</Text>
-                </View>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Amount:</Text>
-                  <Text style={styles.summaryAmount}>
-                    {formatCurrency(parseFloat(amount))}
-                  </Text>
-                </View>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Bank:</Text>
-                  <Text style={styles.summaryValue}>{recipient.bank}</Text>
-                </View>
-              </Card>
-            )}
+            {recipient &&
+              transferType &&
+              amount &&
+              !errors.amount &&
+              !errors.recipient &&
+              !errors.transferType && (
+                <Card style={styles.summaryCard}>
+                  <Text style={styles.summaryTitle}>Transfer Summary</Text>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>To:</Text>
+                    <Text style={styles.summaryValue}>{recipient.name}</Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Amount:</Text>
+                    <Text style={styles.summaryAmount}>
+                      {formatCurrency(parseFloat(amount))}
+                    </Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Bank:</Text>
+                    <Text style={styles.summaryValue}>{recipient.bank}</Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Transfer Type:</Text>
+                    <Text style={styles.summaryValue}>
+                      {transferType === "duitnow"
+                        ? "DuitNow Transfer"
+                        : "Interbank GIRO"}
+                    </Text>
+                  </View>
+                </Card>
+              )}
 
             {errors.general && (
               <Text style={styles.errorText}>{errors.general}</Text>
             )}
           </View>
         </ScrollView>
+
         <View style={styles.footer}>
           <Button
             title="Continue"
             onPress={handleContinue}
             disabled={
-              !recipient || !amount || !!errors.amount || !!errors.recipient
+              !recipient ||
+              !transferType ||
+              !amount ||
+              !!errors.amount ||
+              !!errors.recipient ||
+              !!errors.transferType
             }
             size="large"
             style={styles.continueButton}

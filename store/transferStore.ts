@@ -26,6 +26,7 @@ const useTransferStore = create<TransferState>((set) => ({
       status: "completed",
       type: "transfer",
       bank: "Maybank",
+      transferType: "duitnow",
     },
     {
       id: "2",
@@ -37,29 +38,7 @@ const useTransferStore = create<TransferState>((set) => ({
       status: "completed",
       type: "transfer",
       bank: "CIMB Bank",
-    },
-  ],
-  favoriteContacts: [
-    {
-      id: "1",
-      name: "Sarah Lee",
-      accountNumber: "9876543210",
-      bank: "Maybank",
-      isFrequent: true,
-    },
-    {
-      id: "2",
-      name: "Ali Hassan",
-      accountNumber: "5555666677",
-      bank: "CIMB Bank",
-      isFrequent: true,
-    },
-    {
-      id: "3",
-      name: "Siti Aminah",
-      accountNumber: "1111222233",
-      bank: "Public Bank",
-      isFrequent: false,
+      transferType: "interbank",
     },
   ],
   isProcessing: false,

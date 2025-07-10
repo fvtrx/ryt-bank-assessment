@@ -1,5 +1,6 @@
 import { ApiResponse, Contact, Transaction, TransferRequest } from "@/types";
 
+// Simulate API delays
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 class ApiService {
@@ -8,7 +9,7 @@ class ApiService {
   ): Promise<ApiResponse<{ name: string; bank: string }>> {
     await delay(1000);
 
-    // Simulate mock accountholders
+    // Simulate account validation
     const mockAccounts: Record<string, { name: string; bank: string }> = {
       "9876543210": { name: "Sarah Lee", bank: "Maybank" },
       "5555666677": { name: "Ali Hassan", bank: "CIMB Bank" },
@@ -59,9 +60,10 @@ class ApiService {
       amount: transferData.amount,
       note: transferData.note,
       timestamp: new Date(),
-      status: "completed",
+      status: transferData.transferType === "duitnow" ? "completed" : "pending",
       type: "transfer",
       bank: transferData.bank,
+      transferType: transferData.transferType,
     };
 
     return {
@@ -80,7 +82,7 @@ class ApiService {
     };
   }
 
-  async getFavoriteRecipients(): Promise<ApiResponse<Contact[]>> {
+  async getContacts(): Promise<ApiResponse<Contact[]>> {
     await delay(300);
 
     // Simulate contact list
@@ -104,7 +106,6 @@ class ApiService {
         name: "Siti Aminah",
         accountNumber: "1111222233",
         bank: "Public Bank",
-        isFrequent: true,
       },
       {
         id: "4",

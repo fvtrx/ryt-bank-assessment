@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 import { TransferRequest } from "@/types";
@@ -8,7 +8,7 @@ interface TransactionSummaryProps {
   transferData: Partial<TransferRequest>;
 }
 
-export const TransactionSummary: FC<TransactionSummaryProps> = ({
+export const TransactionSummary: React.FC<TransactionSummaryProps> = ({
   transferData,
 }) => {
   const formatCurrency = (value: number) => {
@@ -37,6 +37,22 @@ export const TransactionSummary: FC<TransactionSummaryProps> = ({
         <Text style={styles.amount}>
           {formatCurrency(transferData.amount || 0)}
         </Text>
+      </View>
+
+      <View style={styles.row}>
+        <Text style={styles.label}>Transfer Type</Text>
+        <View style={styles.valueContainer}>
+          <Text style={styles.value}>
+            {transferData.transferType === "duitnow"
+              ? "DuitNow Transfer"
+              : "Interbank GIRO"}
+          </Text>
+          <Text style={styles.subValue}>
+            {transferData.transferType === "duitnow"
+              ? "Instant • Real-time processing"
+              : "1-2 business days • Standard processing"}
+          </Text>
+        </View>
       </View>
 
       {transferData.note && (

@@ -22,6 +22,7 @@ export interface TransferRequest {
   amount: number;
   note?: string;
   bank: string;
+  transferType: "duitnow" | "interbank";
 }
 
 export interface Transaction {
@@ -34,6 +35,7 @@ export interface Transaction {
   status: "completed" | "pending" | "failed";
   type: "transfer" | "receive";
   bank: string;
+  transferType: "duitnow" | "interbank";
 }
 
 export interface BiometricResult {
