@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: "Inter-Bold",
-    color: "#333333",
+    color: "#0100E7",
     marginBottom: 4,
   },
   subtitle: {
@@ -301,6 +301,7 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     width: "100%",
+    backgroundColor: "#0100E7",
   },
   bottomSpacing: {
     height: 80,

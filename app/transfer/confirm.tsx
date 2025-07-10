@@ -39,7 +39,7 @@ export default function TransferConfirmScreen() {
     checkBiometricAvailability();
   }, []);
 
-  const transferMutation = useMutation({
+  const { mutate: performTransfer } = useMutation({
     mutationFn: async (transferData: any) => {
       setProcessing(true);
       const result = await apiService.processTransfer(transferData);
@@ -123,7 +123,7 @@ export default function TransferConfirmScreen() {
 
   const processTransfer = () => {
     if (currentTransfer) {
-      transferMutation.mutate(currentTransfer);
+      performTransfer(currentTransfer);
     }
   };
 

@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   outlineText: {
-    color: "#1565C0",
+    color: "#0100E7",
   },
   smallText: {
     fontSize: 14,

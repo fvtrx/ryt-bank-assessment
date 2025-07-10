@@ -6,7 +6,13 @@ import useTransferStore from "@/store/transferStore";
 import { Transaction } from "@/types";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { ArrowDownLeft, ArrowUpRight, Eye, EyeOff } from "lucide-react-native";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Bell,
+  Eye,
+  EyeOff,
+} from "lucide-react-native";
 import React, { useState } from "react";
 import {
   FlatList,
@@ -85,7 +91,7 @@ export default function HomeScreen() {
     {
       id: "transfer",
       title: "Transfer",
-      icon: <ArrowUpRight size={24} color="#1565C0" />,
+      icon: <ArrowUpRight size={24} color="#0100E7" />,
       onPress: () => router.push("/transfer"),
     },
   ];
@@ -94,7 +100,14 @@ export default function HomeScreen() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Good morning,</Text>
+          <Text style={styles.greeting}>
+            {(() => {
+              const hour = new Date().getHours();
+              if (hour < 12) return "Good morning,";
+              if (hour < 18) return "Good afternoon,";
+              return "Good evening,";
+            })()}
+          </Text>
           <Text style={styles.userName}>{user?.name}</Text>
         </View>
         <View style={styles.headerActions}>
@@ -102,6 +115,7 @@ export default function HomeScreen() {
             style={styles.notificationIcon}
             onPress={() => setNotificationModalVisible(true)}
           >
+            <Bell color={"#0100E7"} />
             {unreadCount > 0 && <View style={styles.notificationDot} />}
           </TouchableOpacity>
         </View>
@@ -221,7 +235,7 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 16,
     fontFamily: "Inter-Regular",
-    color: "#666666",
+    color: "#0100E7",
   },
   userName: {
     fontSize: 24,
@@ -252,8 +266,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#FF6B6B",
     position: "absolute",
-    top: 8,
-    right: 8,
+    top: 4,
+    right: 6,
   },
 
   balanceHeader: {

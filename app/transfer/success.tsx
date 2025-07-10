@@ -448,6 +448,7 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
+    borderColor: "#0100E7",
   },
   newTransferCard: {
     alignItems: "center",
@@ -473,6 +474,7 @@ const styles = StyleSheet.create({
   },
   newTransferButton: {
     minWidth: 150,
+    backgroundColor: "#0100E7",
   },
   footer: {
     padding: 20,
@@ -482,6 +484,7 @@ const styles = StyleSheet.create({
   },
   doneButton: {
     width: "100%",
+    backgroundColor: "#0100E7",
   },
   bottomSpacing: {
     height: 8,
