@@ -86,6 +86,46 @@ npm run reset-project
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory.
 
+## Design Decisions & Challenges
+
+This project was completed within a 3-day timeframe (deadline: July 12, 2025), which presented several interesting challenges and required strategic design decisions.
+
+### Design Decisions
+
+1. **Expo Framework**: Chose Expo for rapid development and deployment across platforms without dealing with native build configurations. The Expo SDK provided ready-to-use components like biometric authentication and camera access that accelerated development.
+
+2. **State Management Strategy**: Opted for a lightweight approach using Zustand instead of Redux to reduce boilerplate code while maintaining a predictable state container. This decision saved significant development time while providing good performance.
+
+3. **Mock API Services**: Implemented a mock API service with simulated network delays and randomized failures to mimic real-world conditions without backend dependencies. This allowed for realistic user experience testing with transfer validation, error handling, and success scenarios.
+
+4. **Component Architecture**: Created a hierarchy of reusable components (especially in the UI and transfer folders) to maintain consistency and accelerate development of new screens. The component architecture follows atomic design principles where possible.
+
+5. **File-Based Routing**: Leveraged Expo Router's file-based routing to create an intuitive navigation structure that maps directly to the file system, making the codebase more maintainable and easier to understand.
+
+### Challenges Faced
+
+1. **Time Constraints**: The 3-day deadline required prioritizing core banking features while ensuring a polished user experience. Some nice-to-have features like transaction categorization and detailed reporting had to be deprioritized.
+
+2. **Biometric Authentication**: Implementing secure biometric authentication across different platforms required extensive testing to ensure consistent behavior on both iOS and Android devices.
+
+3. **Transfer Flow UX**: Creating an intuitive yet secure transfer flow that balances user convenience with necessary security measures (PIN verification, confirmation screens) was challenging to get right within the time constraints.
+
+4. **Form Validation**: Implementing robust validation for transfer amounts, account numbers, and recipient details while maintaining a smooth user experience required careful error handling and feedback mechanisms.
+
+5. **Testing Without Backend**: Creating a realistic testing environment with mock data that covers various edge cases (insufficient funds, network errors, validation failures) was crucial for ensuring app reliability.
+
+### Future Improvements
+
+With additional time, these enhancements would be valuable:
+
+1. Implement comprehensive unit and integration tests
+2. Add transaction categorization and analytics features
+3. Support for scheduled/recurring transfers
+4. Enhanced security features like transaction limits and suspicious activity detection
+5. Offline mode for viewing transaction history when network is unavailable
+
+This assessment demonstrates the ability to deliver a functional, user-friendly banking application with core features under tight deadlines while maintaining code quality and architecture best practices.
+
 ## Learn More
 
 - [Expo documentation](https://docs.expo.dev/)
