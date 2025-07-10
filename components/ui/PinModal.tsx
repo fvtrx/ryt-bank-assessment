@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   pinInput: {
-    width: 45,
+    width: 40,
     height: 55,
     borderWidth: 2,
     borderColor: "#E0E0E0",
@@ -349,7 +349,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Inter-Regular",
     color: "#999999",
-
     lineHeight: 18,
   },
 });

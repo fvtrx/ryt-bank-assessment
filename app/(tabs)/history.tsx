@@ -2,6 +2,7 @@ import { ArrowDownLeft, ArrowUpRight, Calendar } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   FlatList,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -289,9 +290,17 @@ const styles = StyleSheet.create({
   transactionsList: {
     flex: 1,
   },
-  listContent: {
-    padding: 20,
-  },
+  listContent: Platform.select({
+    ios: {
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      paddingBottom: 80,
+    },
+    default: {
+      paddingHorizontal: 20,
+      paddingVertical: 20,
+    },
+  }),
   dateGroup: {
     marginBottom: 24,
   },

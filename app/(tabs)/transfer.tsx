@@ -414,7 +414,12 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#0100E7",
   },
-  bottomSpacing: {
-    height: 80,
-  },
+  bottomSpacing: Platform.select({
+    ios: {
+      height: 80,
+    },
+    default: {
+      height: 0,
+    },
+  }),
 });

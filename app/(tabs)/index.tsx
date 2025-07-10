@@ -17,6 +17,7 @@ import React, { useState } from "react";
 import {
   FlatList,
   Image,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -177,30 +178,34 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <Card style={styles.transactionsCard}>
-          <View style={styles.transactionsHeader}>
-            <Text style={styles.sectionTitle}>Recent Transactions</Text>
-            <TouchableOpacity onPress={() => router.push("/history")}>
-              <Text style={styles.viewAllText}>View All</Text>
-            </TouchableOpacity>
-          </View>
-
-          {recentTransactions.length > 0 ? (
-            <FlatList
-              data={recentTransactions.slice(0, 3)}
-              renderItem={renderTransaction}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-              ItemSeparatorComponent={() => (
-                <View style={styles.transactionSeparator} />
-              )}
-            />
-          ) : (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>No recent transactions</Text>
+        <View style={styles.transactionContainer}>
+          <Card style={styles.transactionsCard}>
+            <View style={styles.transactionsHeader}>
+              <Text style={styles.sectionTitle}>Recent Transactions</Text>
+              <TouchableOpacity onPress={() => router.push("/history")}>
+                <Text style={styles.viewAllText}>View All</Text>
+              </TouchableOpacity>
             </View>
-          )}
-        </Card>
+
+            {recentTransactions.length > 0 ? (
+              <FlatList
+                data={recentTransactions.slice(0, 3)}
+                renderItem={renderTransaction}
+                keyExtractor={(item) => item.id}
+                scrollEnabled={false}
+                ItemSeparatorComponent={() => (
+                  <View style={styles.transactionSeparator} />
+                )}
+              />
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>
+                  No recent transactions
+                </Text>
+              </View>
+            )}
+          </Card>
+        </View>
 
         <NotificationModal
           visible={notificationModalVisible}
@@ -216,10 +221,16 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F5F7FA",
-  },
+  container: Platform.select({
+    ios: {
+      flex: 1,
+      backgroundColor: "#F5F7FA",
+    },
+    default: {
+      backgroundColor: "#F5F7FA",
+    },
+  }),
+
   logoContainer: {
     paddingHorizontal: 15,
     paddingTop: 10,
@@ -351,6 +362,14 @@ const styles = StyleSheet.create({
     fontFamily: "Inter-Medium",
     color: "#333333",
   },
+  transactionContainer: Platform.select({
+    ios: {
+      paddingBottom: 80,
+    },
+    default: {
+      paddingBottom: 0,
+    },
+  }),
   transactionsCard: {
     marginHorizontal: 20,
     marginBottom: 24,

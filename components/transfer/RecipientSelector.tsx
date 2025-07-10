@@ -142,17 +142,19 @@ export const RecipientSelector: FC<RecipientSelectorProps> = ({
         </View>
       )}
 
-      {favoriteRecipients?.data && favoriteRecipients.data.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Favorites</Text>
-          <FlatList
-            data={favoriteRecipients.data.filter((c) => c.isFrequent)}
-            renderItem={renderContact}
-            keyExtractor={(item) => `favorite-${item.id}`}
-            scrollEnabled={false}
-          />
-        </View>
-      )}
+      {!searchMode &&
+        favoriteRecipients?.data &&
+        favoriteRecipients.data.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Favorites</Text>
+            <FlatList
+              data={favoriteRecipients.data.filter((c) => c.isFrequent)}
+              renderItem={renderContact}
+              keyExtractor={(item) => `favorite-${item.id}`}
+              scrollEnabled={false}
+            />
+          </View>
+        )}
     </Card>
   );
 };

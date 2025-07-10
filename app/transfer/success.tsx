@@ -93,6 +93,19 @@ Thank you for using Ryt Bank!
     );
   }
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "#2E7D32";
+      case "pending":
+        return "#FF9800";
+      case "failed":
+        return "#D32F2F";
+      default:
+        return "#666666";
+    }
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
@@ -136,8 +149,18 @@ Thank you for using Ryt Bank!
             <View style={styles.receiptRow}>
               <Text style={styles.receiptLabel}>Status</Text>
               <View style={styles.statusContainer}>
-                <View style={styles.statusDot} />
-                <Text style={styles.statusText}>
+                <View
+                  style={[
+                    styles.statusDot,
+                    { backgroundColor: getStatusColor(transaction.status) },
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.statusText,
+                    { color: getStatusColor(transaction.status) },
+                  ]}
+                >
                   {transaction.status.charAt(0).toUpperCase() +
                     transaction.status.slice(1)}
                 </Text>
@@ -336,13 +359,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#2E7D32",
     marginRight: 8,
   },
   statusText: {
     fontSize: 14,
     fontFamily: "Inter-Medium",
-    color: "#2E7D32",
   },
   accountName: {
     fontSize: 16,

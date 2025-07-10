@@ -92,7 +92,7 @@ export const AmountInput: React.FC<AmountInputProps> = ({
       </View>
 
       <View style={styles.quickAmountsContainer}>
-        <Text style={styles.quickAmountsTitle}>Quick Amounts</Text>
+        <Text style={styles.quickAmountsTitle}>Quick Amounts (RM)</Text>
         <View style={styles.quickAmountsRow}>
           {quickAmounts.map((quickAmount) => (
             <TouchableOpacity
@@ -111,7 +111,7 @@ export const AmountInput: React.FC<AmountInputProps> = ({
                     styles.quickAmountTextActive,
                 ]}
               >
-                RM {quickAmount}
+                {quickAmount}
               </Text>
             </TouchableOpacity>
           ))}
