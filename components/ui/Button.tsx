@@ -11,7 +11,7 @@ import {
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: "primary" | "secondary" | "outline";
+  variant?: "primary" | "secondary" | "outline" | "danger";
   size?: "small" | "medium" | "large";
   disabled?: boolean;
   loading?: boolean;
@@ -82,6 +82,11 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#1565C0",
   },
+  danger: {
+    backgroundColor: "transparent",
+    borderWidth: 1.5,
+    borderColor: "#D32F2F",
+  },
   small: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -109,6 +114,9 @@ const styles = StyleSheet.create({
   },
   outlineText: {
     color: "#0100E7",
+  },
+  dangerText: {
+    color: "#D32F2F",
   },
   smallText: {
     fontSize: 14,
