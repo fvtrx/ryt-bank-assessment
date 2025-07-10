@@ -70,11 +70,22 @@ This project uses:
 
 You can start developing by editing the files inside the **app** directory.
 
-## Mock PIN
+## Mock Data/Credentials
 
+### In-app PIN
 Upon reaching payment transfer confirmation screen, you'll be prompt with a modal requesting for the 6-digit in-app PIN number before proceeding with the transfer.
 
 Therefore, the correct PIN number that is used for this project is `123456`.
+
+### Money Transfers - 3rd Party Accounts Recipients
+Below are the mock account number data that you can use for searching the account holders details to perform money transfers.
+
+| Account No.              | isFrequent |
+| :---------------- | :------: |
+| "4444555566"       |   `True`   |
+| "1111222233"         |   `True`   | 
+| "5555666677"    |  `False`   |
+| "9876543210" |  `False`   | 
 
 ## Reset Project
 
@@ -92,11 +103,11 @@ This project was completed within a 3-day timeframe (deadline: July 12, 2025), w
 
 ### Design Decisions
 
-1. **Expo Framework**: Chose Expo for rapid development and deployment across platforms without dealing with native build configurations. The Expo SDK provided ready-to-use components like biometric authentication and camera access that accelerated development.
+1. **Expo Framework**: Choosing Expo for rapid development and deployment across platforms without dealing with native build configurations. The Expo SDK provided ready-to-use components like biometric authentication and camera access that accelerated development.
 
-2. **State Management Strategy**: Opted for a lightweight approach using Zustand instead of Redux to reduce boilerplate code while maintaining a predictable state container. This decision saved significant development time while providing good performance.
+2. **State Management Strategy**: I've opted for a lightweight approach using Zustand instead of Redux to reduce boilerplate code while maintaining a predictable state container. This decision saved significant development time while providing good performance.
 
-3. **Mock API Services**: Implemented a mock API service with simulated network delays and randomized failures to mimic real-world conditions without backend dependencies. This allowed for realistic user experience testing with transfer validation, error handling, and success scenarios.
+3. **Mock API Services**: Manage to implement a mock API service with simulated network delays and randomized failures to mimic real-world conditions without backend dependencies. This allowed for realistic user experience testing with transfer validation, error handling, and success scenarios.
 
 4. **Component Architecture**: Created a hierarchy of reusable components (especially in the UI and transfer folders) to maintain consistency and accelerate development of new screens. The component architecture follows atomic design principles where possible.
 
