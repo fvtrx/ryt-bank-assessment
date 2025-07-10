@@ -1,6 +1,10 @@
+import useAccountValidation from "@/hooks/transfer/useAccountValidation";
+import { apiService } from "@/services/mock/api";
+import useAuthStore from "@/store/authStore";
+import { Contact } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { Clock, Search, User } from "lucide-react-native";
-import React, { FC, useState } from "react";
+import React, { FC, useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -8,10 +12,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-import { apiService } from "@/services/mock/api";
-import useAuthStore from "@/store/authStore";
-import { Contact } from "@/types";
 import Card from "../ui/Card";
 import Input from "../ui/Input";
 
@@ -30,79 +30,117 @@ export const RecipientSelector: FC<RecipientSelectorProps> = ({
 }) => {
   const [searchMode, setSearchMode] = useState(false);
   const [accountNumber, setAccountNumber] = useState("");
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<
+    string | null | undefined
+  >(null);
   const { hasValidatedBiometric } = useAuthStore();
 
   const { data: favoriteRecipients } = useQuery({
     queryKey: ["favoriteRecipients"],
     queryFn: () => apiService.getFavoriteRecipients(),
+    staleTime: 10 * 60 * 1000,
   });
 
-  const { data: validation } = useQuery({
-    queryKey: ["validateAccount", accountNumber],
-    queryFn: () => apiService.validateAccountNumber(accountNumber),
-    enabled: accountNumber.length >= 10,
-    retry: false,
-  });
+  const {
+    data: accountValidation,
+    isLoading: isValidating,
+    error: accountValidationError,
+  } = useAccountValidation(accountNumber);
 
-  const handleAccountNumberChange = (text: string) => {
+  // Memoize validation state to avoid unnecessary re-renders
+  const validationState = useMemo(() => {
+    if (isValidating) return { status: "loading" };
+    if (accountValidationError)
+      return { status: "error", message: "Network error occurred" };
+    if (!accountValidation) return { status: "idle" };
+    if (accountValidation.success)
+      return { status: "success", data: accountValidation.data };
+    return {
+      status: "error",
+      message: accountValidation.error || "Account not found",
+    };
+  }, [accountValidation, isValidating, accountValidationError]);
+
+  useEffect(() => {
+    if (validationState.status === "error") {
+      setValidationError(validationState.message);
+    } else if (validationState.status === "success") {
+      setValidationError(null);
+    }
+  }, [validationState]);
+
+  const handleAccountNumberChange = useCallback((text: string) => {
     setAccountNumber(text);
     setValidationError(null);
+  }, []);
 
-    if (validation && !validation.success) {
-      setValidationError(validation.error || "Account not found");
-    }
-  };
-
-  const handleAccountSelect = () => {
-    if (validation?.success && validation.data) {
+  const handleAccountSelect = useCallback(() => {
+    if (validationState.status === "success" && validationState.data) {
       onSelect({
-        name: validation.data.name,
+        name: validationState.data.name,
         accountNumber: accountNumber,
-        bank: validation.data.bank,
+        bank: validationState.data.bank,
       });
       setSearchMode(false);
     }
-  };
+  }, [validationState, accountNumber, onSelect]);
 
-  const handleContactSelect = (contact: Contact) => {
-    onSelect({
-      name: contact.name,
-      accountNumber: contact.accountNumber,
-      bank: contact.bank,
-    });
-  };
-
-  const renderContact = ({
-    item,
-  }: {
-    item: Contact & { isRecent?: boolean };
-  }) => (
-    <TouchableOpacity
-      style={[
-        styles.contactItem,
-        selectedAccountNumber === item.accountNumber && styles.selectedContact,
-      ]}
-      onPress={() => handleContactSelect(item)}
-    >
-      <View style={styles.contactIcon}>
-        {item.isRecent ? (
-          <Clock size={20} color="#1565C0" />
-        ) : (
-          <User size={20} color="#1565C0" />
-        )}
-      </View>
-      <View style={styles.contactInfo}>
-        <Text style={styles.contactName}>{item.name}</Text>
-        <Text style={styles.contactDetails}>
-          {!hasValidatedBiometric
-            ? `****${item.accountNumber.slice(-4)}`
-            : item.accountNumber}
-          • {item.bank}
-        </Text>
-      </View>
-    </TouchableOpacity>
+  const handleContactSelect = useCallback(
+    (contact: Contact) => {
+      onSelect({
+        name: contact.name,
+        accountNumber: contact.accountNumber,
+        bank: contact.bank,
+      });
+    },
+    [onSelect]
   );
+
+  const toggleSearchMode = useCallback(() => {
+    setSearchMode((prev) => !prev);
+  }, []);
+
+  const filteredFavorites = useMemo(() => {
+    return favoriteRecipients?.data?.filter((c) => c.isFrequent) || [];
+  }, [favoriteRecipients?.data]);
+
+  const renderContact = useCallback(
+    ({ item }: { item: Contact & { isRecent?: boolean } }) => (
+      <TouchableOpacity
+        style={[
+          styles.contactItem,
+          selectedAccountNumber === item.accountNumber &&
+            styles.selectedContact,
+        ]}
+        onPress={() => handleContactSelect(item)}
+      >
+        <View style={styles.contactIcon}>
+          {item.isRecent ? (
+            <Clock size={20} color="#1565C0" />
+          ) : (
+            <User size={20} color="#1565C0" />
+          )}
+        </View>
+        <View style={styles.contactInfo}>
+          <Text style={styles.contactName}>{item.name}</Text>
+          <Text style={styles.contactDetails}>
+            {!hasValidatedBiometric
+              ? `****${item.accountNumber.slice(-4)}`
+              : item.accountNumber}
+            • {item.bank}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    ),
+    [selectedAccountNumber, hasValidatedBiometric, handleContactSelect]
+  );
+
+  const keyExtractor = useCallback(
+    (item: Contact) => `favorite-${item.id}`,
+    []
+  );
+
+  const isSelectButtonEnabled = validationState.status === "success";
 
   return (
     <Card style={styles.container}>
@@ -110,7 +148,7 @@ export const RecipientSelector: FC<RecipientSelectorProps> = ({
         <Text style={styles.title}>Select Recipient</Text>
         <TouchableOpacity
           style={styles.searchButton}
-          onPress={() => setSearchMode(!searchMode)}
+          onPress={toggleSearchMode}
         >
           <Search size={20} color="#1565C0" />
         </TouchableOpacity>
@@ -127,13 +165,29 @@ export const RecipientSelector: FC<RecipientSelectorProps> = ({
             error={validationError}
           />
 
-          {validation?.success && validation.data && (
+          {/* Show loading indicator */}
+          {validationState.status === "loading" && (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>Searching...</Text>
+            </View>
+          )}
+
+          {/* Show validation result */}
+          {validationState.status === "success" && validationState.data && (
             <View style={styles.validationResult}>
-              <Text style={styles.validatedName}>{validation.data.name}</Text>
-              <Text style={styles.validatedBank}>{validation.data.bank}</Text>
+              <Text style={styles.validatedName}>
+                {validationState.data.name}
+              </Text>
+              <Text style={styles.validatedBank}>
+                {validationState.data.bank}
+              </Text>
               <TouchableOpacity
-                style={styles.selectButton}
+                style={[
+                  styles.selectButton,
+                  !isSelectButtonEnabled && styles.selectButtonDisabled,
+                ]}
                 onPress={handleAccountSelect}
+                disabled={!isSelectButtonEnabled}
               >
                 <Text style={styles.selectButtonText}>Select</Text>
               </TouchableOpacity>
@@ -142,19 +196,58 @@ export const RecipientSelector: FC<RecipientSelectorProps> = ({
         </View>
       )}
 
-      {!searchMode &&
-        favoriteRecipients?.data &&
-        favoriteRecipients.data.length > 0 && (
+      {/* Show selected account if it's not from favorites */}
+      {selectedAccountNumber &&
+        !filteredFavorites.some(
+          (contact) => contact.accountNumber === selectedAccountNumber
+        ) && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Favorites</Text>
-            <FlatList
-              data={favoriteRecipients.data.filter((c) => c.isFrequent)}
-              renderItem={renderContact}
-              keyExtractor={(item) => `favorite-${item.id}`}
-              scrollEnabled={false}
-            />
+            <Text style={styles.sectionTitle}>Selected Recipient</Text>
+            <View style={[styles.contactItem, styles.selectedContact]}>
+              <View style={styles.contactIcon}>
+                <User size={20} color="#1565C0" />
+              </View>
+              <View style={styles.contactInfo}>
+                <Text style={styles.contactName}>
+                  {accountValidation?.success
+                    ? accountValidation?.data?.name
+                    : "Selected Account"}
+                </Text>
+                <Text style={styles.contactDetails}>
+                  {!hasValidatedBiometric
+                    ? `****${selectedAccountNumber.slice(-4)}`
+                    : selectedAccountNumber}
+                  {accountValidation?.success
+                    ? ` • ${accountValidation?.data?.bank}`
+                    : ""}
+                </Text>
+              </View>
+            </View>
           </View>
         )}
+
+      {filteredFavorites.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Favorites</Text>
+          <FlatList
+            data={filteredFavorites}
+            renderItem={renderContact}
+            keyExtractor={keyExtractor}
+            scrollEnabled={false}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            initialNumToRender={10}
+            getItemLayout={
+              (data, index) => ({
+                length: 72,
+                offset: 72 * index,
+                index,
+              }) // Assuming item height is 72
+            }
+          />
+        </View>
+      )}
     </Card>
   );
 };
@@ -179,6 +272,17 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     marginBottom: 16,
+  },
+  loadingContainer: {
+    backgroundColor: "transparent",
+    padding: 16,
+    marginTop: 8,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontFamily: "Inter-Regular",
+    color: "#0100E7",
+    textAlign: "center",
   },
   validationResult: {
     backgroundColor: "#F0F8FF",
@@ -205,6 +309,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     alignSelf: "flex-start",
+  },
+  selectButtonDisabled: {
+    backgroundColor: "#CCCCCC",
   },
   selectButtonText: {
     color: "#FFFFFF",
