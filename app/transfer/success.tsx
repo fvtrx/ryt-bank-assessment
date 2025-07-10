@@ -5,7 +5,11 @@ import useTransferStore from "@/store/transferStore";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { CircleCheck as CheckCircle } from "lucide-react-native";
 import React from "react";
-import { ScrollView, Share, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+
+import * as FileSystem from "expo-file-system";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 
 export default function TransferSuccessScreen() {
   const router = useRouter();
@@ -44,34 +48,323 @@ export default function TransferSuccessScreen() {
   const handleShareReceipt = async () => {
     if (!transaction) return;
 
-    const receiptText = `
-Ryt Bank Transfer Receipt
+    const referenceNumber = generateReferenceNumber();
+    const formattedDate = formatDateTime(transaction.timestamp);
+    const formattedAmount = formatCurrency(transaction.amount);
 
-Reference: ${generateReferenceNumber()}
-Date: ${formatDateTime(transaction.timestamp)}
-
-FROM: ${user?.name}
-Account: ${user?.accountNumber}
-
-TO: ${transaction.recipientName}
-Account: ${transaction.recipientAccountNumber}
-Bank: ${transaction.bank}
-
-Amount: ${formatCurrency(transaction.amount)}
-${transaction.note ? `Note: ${transaction.note}` : ""}
-
-Status: ${transaction.status.toUpperCase()}
-
-Thank you for using Ryt Bank!
+    // Generate HTML content for the PDF
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Transfer Receipt</title>
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #f5f5f5;
+            color: #1a1a1a;
+            line-height: 1.4;
+          }
+          .receipt-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid #e8e8e8;
+          }
+          .header {
+            background: linear-gradient(135deg, #1e3ff0 0%, #0d2db8 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            position: relative;
+          }
+          .bank-logo {
+            width: 180px;
+            height: auto;
+            margin: 0 auto 15px;
+            display: block;
+          }
+          .receipt-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 8px;
+          }
+          .receipt-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            font-weight: 300;
+          }
+          .content {
+            padding: 20px;
+          }
+          .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+          }
+          .status-completed {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+          }
+          .status-completed::before {
+            content: "✓";
+            margin-right: 4px;
+            font-size: 12px;
+          }
+          .status-pending {
+            background-color: #fff3e0;
+            color: #f57c00;
+          }
+          .status-pending::before {
+            content: "⏳";
+            margin-right: 4px;
+            font-size: 12px;
+          }
+          .status-failed {
+            background-color: #ffebee;
+            color: #d32f2f;
+          }
+          .status-failed::before {
+            content: "✗";
+            margin-right: 4px;
+            font-size: 12px;
+          }
+          .reference-section {
+            background: #f8f9fb;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 3px solid #1e3ff0;
+          }
+          .reference-number {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e3ff0;
+            margin-bottom: 4px;
+          }
+          .reference-date {
+            font-size: 13px;
+            color: #666;
+          }
+          .transaction-details {
+            margin-bottom: 20px;
+          }
+          .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+          }
+          .detail-row:last-child {
+            border-bottom: none;
+          }
+          .detail-label {
+            font-weight: 500;
+            color: #666;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+          }
+          .detail-value {
+            font-weight: 500;
+            color: #1a1a1a;
+            text-align: right;
+            max-width: 60%;
+            font-size: 14px;
+          }
+          .amount-section {
+            background: linear-gradient(135deg, #1e3ff0 0%, #0d2db8 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+            color: white;
+          }
+          .amount-label {
+            font-size: 13px;
+            opacity: 0.8;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+          .amount-value {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+          }
+          .note-section {
+            background: #f8f9fb;
+            padding: 14px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 3px solid #1e3ff0;
+          }
+          .note-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            font-weight: 500;
+          }
+          .note-text {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.4;
+          }
+          .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fb;
+            color: #666;
+            font-size: 11px;
+          }
+          .footer-logo {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e3ff0;
+            margin-bottom: 4px;
+          }
+          .divider {
+            height: 1px;
+            background: #f0f0f0;
+            margin: 15px 0;
+          }
+          .section-divider {
+            height: 8px;
+            background: linear-gradient(90deg, transparent, #f0f0f0, transparent);
+            margin: 20px -20px;
+          }
+          @media print {
+            body { background-color: white; }
+            .receipt-container { box-shadow: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="receipt-container">
+          <div class="header">
+            <div class="receipt-title">Transfer Receipt</div>
+          </div>
+          
+          <div class="content">
+            <div class="status-badge status-${transaction.status}">
+              ${transaction.status.toUpperCase()}
+            </div>
+            
+            <div class="reference-section">
+              <div class="reference-number">${referenceNumber}</div>
+              <div class="reference-date">${formattedDate}</div>
+            </div>
+            
+            <div class="transaction-details">
+              <div class="detail-row">
+                <span class="detail-label">FROM</span>
+                <span class="detail-value">${user?.name || "N/A"}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Account Number</span>
+                <span class="detail-value">${
+                  user?.accountNumber || "N/A"
+                }</span>
+              </div>
+              <div class="divider"></div>
+              <div class="detail-row">
+                <span class="detail-label">TO</span>
+                <span class="detail-value">${transaction.recipientName}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Account Number</span>
+                <span class="detail-value">${
+                  transaction.recipientAccountNumber
+                }</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Bank</span>
+                <span class="detail-value">${transaction.bank}</span>
+              </div>
+            </div>
+            
+            <div class="amount-section">
+              <div class="amount-label">Transfer Amount</div>
+              <div class="amount-value">${formattedAmount}</div>
+            </div>
+            
+            ${
+              transaction.note
+                ? `
+            <div class="note-section">
+              <div class="note-label">Note</div>
+              <div class="note-text">${transaction.note}</div>
+            </div>
+            `
+                : ""
+            }
+            
+            <div class="footer">
+              <div class="footer-logo">RYT BANK</div>
+              <div>Thank you for using our services</div>
+              <div style="margin-top: 10px; font-size: 10px; color: #999;">
+                This is a system generated receipt. No signature required.
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
     `;
 
     try {
-      await Share.share({
-        message: receiptText,
-        title: "Transfer Receipt",
+      // Generate PDF
+      const { uri } = await Print.printToFileAsync({
+        html: htmlContent,
+        base64: false,
+        margins: {
+          left: 0,
+          top: 0,
+          right: 0,
+          bottom: 0,
+        },
       });
+
+      // Create a new filename with timestamp
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const filename = `RytBank_Receipt_${timestamp}.pdf`;
+      const newUri = `${FileSystem.documentDirectory}${filename}`;
+
+      // Move the file to a permanent location
+      await FileSystem.moveAsync({
+        from: uri,
+        to: newUri,
+      });
+
+      // Share the PDF
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(newUri, {
+          mimeType: "application/pdf",
+          dialogTitle: "Share Transfer Receipt",
+          UTI: "com.adobe.pdf",
+        });
+      } else {
+        console.log("Sharing is not available on this device");
+        // Fallback: you could show an alert or save to device storage
+      }
     } catch (error) {
-      console.error("Error sharing receipt:", error);
+      console.error("Error generating PDF receipt:", error);
+      // You might want to show an error alert to the user
     }
   };
 
@@ -223,12 +516,6 @@ Thank you for using Ryt Bank!
             title="Share Receipt"
             variant="outline"
             onPress={handleShareReceipt}
-            style={styles.actionButton}
-          />
-          <Button
-            title="Save Receipt"
-            variant="outline"
-            onPress={() => {}} // Placeholder for save functionality
             style={styles.actionButton}
           />
         </View>
