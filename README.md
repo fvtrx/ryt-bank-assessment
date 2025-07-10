@@ -2,6 +2,10 @@
 
 A React Native mobile banking application built with Expo. This app provides banking features including fund transfers, transaction history, and profile management.
 
+
+## App Walkthrough
+https://github.com/user-attachments/assets/d5a8be14-9c58-4bef-a9fb-c5ef1cd97a0c
+
 ## Features
 
 - **Home Dashboard**: View account balance and recent transactions
