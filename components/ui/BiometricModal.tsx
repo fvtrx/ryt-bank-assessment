@@ -81,7 +81,7 @@ const BiometricModal: FC<BiometricModalProps> = ({
               loading={isAuthenticating || isSuccess}
               style={[
                 styles.authenticateButton,
-                { backgroundColor: isSuccess ? "#4CAF50" : "#0100E7" },
+                { backgroundColor: "#0100E7" },
               ]}
               disabled={isSuccess}
             />
