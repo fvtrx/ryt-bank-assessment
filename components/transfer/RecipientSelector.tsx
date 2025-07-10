@@ -160,7 +160,9 @@ export const RecipientSelector: FC<RecipientSelectorProps> = ({
             label="Account Number"
             placeholder="Enter account number"
             value={accountNumber}
-            onChangeText={handleAccountNumberChange}
+            onChangeText={(text) =>
+              handleAccountNumberChange(text.replace(/[^0-9]/g, ""))
+            }
             keyboardType="numeric"
             error={validationError}
           />
