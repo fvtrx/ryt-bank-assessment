@@ -64,6 +64,12 @@ This project uses:
 
 You can start developing by editing the files inside the **app** directory.
 
+## Mock PIN
+
+Upon reaching payment transfer confirmation screen, you'll be prompt with a modal requesting for the 6-digit in-app PIN number before proceeding with the transfer.
+
+Therefore, the correct PIN number that is used for this project is `123456`.
+
 ## Reset Project
 
 To reset the project to its initial state, run:
