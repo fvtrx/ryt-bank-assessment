@@ -10,7 +10,7 @@ import useAuthStore from "@/store/authStore";
 import useTransferStore from "@/store/transferStore";
 import { TransferRequest } from "@/types";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Platform,
@@ -30,7 +30,7 @@ export default function TransferScreen() {
   const router = useRouter();
   const { user, hasValidatedBiometric, setHasValidatedBiometric } =
     useAuthStore();
-  const { setTransferData, clearTransfer, setError } = useTransferStore();
+  const { setTransferData, clearTransfer } = useTransferStore();
 
   const [showBiometricModal, setShowBiometricModal] = useState(false);
   const [amount, setAmount] = useState("");
@@ -39,20 +39,13 @@ export default function TransferScreen() {
   const [transferType, setTransferType] = useState<
     "duitnow" | "interbank" | null
   >(null);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [, setBiometricAvailable] = useState(false);
   const [errors, setErrors] = useState<{
     amount?: string;
     recipient?: string;
     transferType?: string;
     general?: string;
   }>({});
-
-  // Check biometric validation when screen comes into focus
-  useFocusEffect(
-    React.useCallback(() => {
-      checkBiometricAndPrompt();
-    }, [hasValidatedBiometric])
-  );
 
   const checkBiometricAndPrompt = async () => {
     if (!hasValidatedBiometric) {
@@ -63,42 +56,32 @@ export default function TransferScreen() {
         setShowBiometricModal(true);
       } else {
         // For web or devices without biometric, show alert and allow access
-        if (Platform.OS === "web") {
-          Alert.alert(
-            "Biometric Not Available",
-            "Biometric authentication is not available on web. You can proceed with PIN authentication on the confirmation screen.",
-            [
-              {
-                text: "Continue",
-                onPress: () => setHasValidatedBiometric(true),
-              },
-              {
-                text: "Cancel",
-                style: "cancel",
-                onPress: () => router.back(),
-              },
-            ]
-          );
-        } else {
-          Alert.alert(
-            "Biometric Not Available",
-            "Biometric authentication is not available on this device. You can proceed with PIN authentication on the confirmation screen.",
-            [
-              {
-                text: "Continue",
-                onPress: () => setHasValidatedBiometric(true),
-              },
-              {
-                text: "Cancel",
-                style: "cancel",
-                onPress: () => router.back(),
-              },
-            ]
-          );
-        }
+        const message =
+          Platform.OS === "web"
+            ? "Biometric authentication is not available on web. You can proceed with PIN authentication on the confirmation screen."
+            : "Biometric authentication is not available on this device. You can proceed with PIN authentication on the confirmation screen.";
+
+        Alert.alert("Biometric Not Available", message, [
+          {
+            text: "Continue",
+            onPress: () => setHasValidatedBiometric(true),
+          },
+          {
+            text: "Cancel",
+            style: "cancel",
+            onPress: () => router.replace("/"),
+          },
+        ]);
       }
     }
   };
+
+  // Check biometric validation when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      checkBiometricAndPrompt();
+    }, [hasValidatedBiometric])
+  );
 
   useEffect(() => {
     // Clear any previous transfer data when entering the screen
@@ -121,7 +104,7 @@ export default function TransferScreen() {
           {
             text: "Go Back",
             style: "cancel",
-            onPress: () => router.back(),
+            onPress: () => router.replace("/"),
           },
         ]
       );
@@ -130,7 +113,7 @@ export default function TransferScreen() {
 
   const handleBiometricCancel = () => {
     setShowBiometricModal(false);
-    router.back();
+    router.replace("/");
   };
 
   const validateTransfer = (): boolean => {

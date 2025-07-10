@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontFamily: "Inter-Bold",
-    color: "#333333",
+    color: "#0100E7",
   },
   userCard: {
     margin: 20,
