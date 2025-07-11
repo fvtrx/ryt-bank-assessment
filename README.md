@@ -47,10 +47,10 @@ https://github.com/user-attachments/assets/d5a8be14-9c58-4bef-a9fb-c5ef1cd97a0c
 
 2. Recommend to install Node and Watchman using Homebrew, if you haven't done so. Run the following commands in a Terminal after installing Homebrew:
 
-  ```bash
-  brew install node
-  brew install watchman
-  ```
+   ```bash
+   brew install node
+   brew install watchman
+   ```
 
 3. Open the repo folder in IDE. Then, install dependencies
 
