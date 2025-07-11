@@ -45,16 +45,27 @@ https://github.com/user-attachments/assets/d5a8be14-9c58-4bef-a9fb-c5ef1cd97a0c
    https://github.com/fvtrx/ryt-bank-assessment.git
    ```
 
-2. Install dependencies
+2. Recommend to install Node and Watchman using Homebrew, if you haven't done so. Run the following commands in a Terminal after installing Homebrew:
+
+  ```bash
+  brew install node
+  brew install watchman
+  ```
+
+3. Open the repo folder in IDE. Then, install dependencies
 
    ```bash
    npm install
+   OR
+   bun install
    ```
 
-3. Start the app
+4. Start the app
 
    ```bash
    npx expo start
+   OR
+   bunx expo start
    ```
 
    In the output, you'll find options to open the app in a:
@@ -96,6 +107,8 @@ To reset the project to its initial state, run:
 
 ```bash
 npm run reset-project
+OR
+bun run reset-project
 ```
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory.
